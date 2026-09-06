@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('node:path');
 const { createTaskStore, validStatuses } = require('./task-store');
 
 function createApp({ taskStore = createTaskStore() } = {}) {
@@ -6,19 +7,13 @@ function createApp({ taskStore = createTaskStore() } = {}) {
 
   app.disable('x-powered-by');
   app.use(express.json({ limit: '16kb' }));
+  app.use(express.static(path.join(__dirname, '..', '..', 'frontend')));
 
   app.get('/health', (_request, response) => {
     response.status(200).json({
       status: 'ok',
       service: 'task-manager-api',
       timestamp: new Date().toISOString()
-    });
-  });
-
-  app.get('/', (_request, response) => {
-    response.status(200).json({
-      message: 'Task Manager API is running.',
-      healthCheck: '/health'
     });
   });
 

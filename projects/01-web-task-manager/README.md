@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-The API listens on `http://localhost:3000` by default. Set `PORT` only through an environment variable when a different port is needed.
+The local application listens on `http://localhost:3000` by default. Express serves the static frontend from `frontend`, while `/api/*` reaches the API. Set `PORT` only through an environment variable when a different port is needed.
 
 ## Verification
 
@@ -19,6 +19,8 @@ The API listens on `http://localhost:3000` by default. Set `PORT` only through a
 npm test
 Invoke-RestMethod -Uri 'http://localhost:3000/health'
 ```
+
+Open `http://localhost:3000` in a browser to use the frontend.
 
 ## API contract (initial version)
 

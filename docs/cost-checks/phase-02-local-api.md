@@ -1,11 +1,11 @@
 # Cost Check — Phase 2: Local API Foundation
 
 **Date:** 2026-09-06
-**Scope:** Node.js API, Express, automated tests, and local development server.
+**Scope:** Node.js API, static frontend, Express, automated tests, and local development server.
 
 ## Resources created
 
-- Local source code and npm dependencies only.
+- Local source code, static frontend, and npm dependencies only.
 - No AWS resources.
 
 ## Resources that generate cost

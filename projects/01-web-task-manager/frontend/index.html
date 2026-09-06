@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Task Manager for the AWS Cloud Portfolio">
+    <title>AWS Cloud Portfolio — Task Manager</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="page-header">
+        <p class="eyebrow">AWS Cloud Portfolio · Project 01</p>
+        <h1>Task Manager</h1>
+        <p class="subtitle">A small application built to demonstrate production-minded AWS architecture.</p>
+      </header>
+
+      <section class="panel" aria-labelledby="task-form-title">
+        <div class="section-heading">
+          <h2 id="task-form-title">Create a task</h2>
+          <p id="form-mode" class="muted">Tasks are stored in memory in this local version.</p>
+        </div>
+
+        <form id="task-form">
+          <label for="title">Title <span aria-hidden="true">*</span></label>
+          <input id="title" name="title" type="text" maxlength="200" required autocomplete="off">
+
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="4" maxlength="1000"></textarea>
+
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            <option value="todo">To do</option>
+            <option value="in_progress">In progress</option>
+            <option value="done">Done</option>
+          </select>
+
+          <div class="form-actions">
+            <button id="submit-task" type="submit">Create task</button>
+            <button id="cancel-edit" class="secondary hidden" type="button">Cancel edit</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="tasks-title">
+        <div class="section-heading tasks-heading">
+          <div>
+            <h2 id="tasks-title">Tasks</h2>
+            <p id="task-count" class="muted">Loading tasks…</p>
+          </div>
+          <button id="refresh-tasks" class="secondary" type="button">Refresh</button>
+        </div>
+        <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+        <ul id="task-list" class="task-list" aria-live="polite"></ul>
+      </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
