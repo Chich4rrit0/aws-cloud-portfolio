@@ -1,0 +1,27 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.aws/
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Node.js
+node_modules/
+dist/
+coverage/
+*.log
+
+# Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
