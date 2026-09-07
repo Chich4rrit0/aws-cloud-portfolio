@@ -13,7 +13,7 @@ $ErrorActionPreference = 'Stop'
 
 $roleName = 'portfolio-p01-ec2-role'
 $instanceProfileName = 'portfolio-p01-ec2-profile'
-$parameterPath = '/aws-cloud-portfolio/project-01/database/password'
+$parameterPath = '/portfolio/project-01/database/password'
 $managedPolicyArn = 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
 $tags = @(
     'Key=Name,Value=portfolio-p01-ec2-role',

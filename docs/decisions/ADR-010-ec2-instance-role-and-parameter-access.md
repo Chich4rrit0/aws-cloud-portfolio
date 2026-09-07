@@ -13,7 +13,7 @@ Create `portfolio-p01-ec2-role` and attach it through `portfolio-p01-ec2-profile
 
 - The trust policy permits assumption only by `ec2.amazonaws.com`.
 - The AWS-managed `AmazonSSMManagedInstanceCore` policy enables Systems Manager Session Manager.
-- The inline `Project01ReadDatabasePassword` policy permits only `ssm:GetParameter` on `/aws-cloud-portfolio/project-01/database/password`.
+- The inline `Project01ReadDatabasePassword` policy permits only `ssm:GetParameter` on `/portfolio/project-01/database/password`.
 - No `ssm:GetParametersByPath`, `ssm:DescribeParameters`, write, delete, IAM administration, access key, or `AdministratorAccess` permission is granted.
 
 The future parameter will use the default `aws/ssm` key for this cost-conscious development environment. If a customer-managed KMS key is later selected, the role policy must be reviewed to add constrained `kms:Decrypt` access before deployment.

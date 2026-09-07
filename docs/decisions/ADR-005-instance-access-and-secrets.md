@@ -36,5 +36,5 @@ Ruta planificada del parámetro:
 
 ```text
 
-/aws-cloud-portfolio/project-01/database/password
+/portfolio/project-01/database/password
 
