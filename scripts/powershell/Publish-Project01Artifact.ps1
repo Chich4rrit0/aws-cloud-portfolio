@@ -46,7 +46,7 @@ $stagingDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "project-01-arti
 $archivePath = Join-Path $artifactDirectory "task-manager-$commit.zip"
 
 try {
-    New-Item -ItemType Directory -Path $artifactDirectory, $stagingDirectory -Force | Out-Null
+New-Item -ItemType Directory -Path $artifactDirectory, $stagingDirectory, (Join-Path $stagingDirectory 'app') -Force | Out-Null
     Get-ChildItem -LiteralPath $appSource -Force | Where-Object { $_.Name -notin @('node_modules', '.env', '.env.local') } | Copy-Item -Destination (Join-Path $stagingDirectory 'app') -Recurse -Force
     Copy-Item -LiteralPath $frontendSource -Destination (Join-Path $stagingDirectory 'frontend') -Recurse -Force
     Compress-Archive -Path (Join-Path $stagingDirectory 'app'), (Join-Path $stagingDirectory 'frontend') -DestinationPath $archivePath -Force
