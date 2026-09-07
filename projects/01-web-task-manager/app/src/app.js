@@ -17,23 +17,36 @@ function createApp({ taskStore = createTaskStore() } = {}) {
     });
   });
 
-  app.get('/api/tasks', (_request, response) => {
-    response.status(200).json({ tasks: taskStore.list() });
+  app.get('/api/tasks', async (_request, response, next) => {
+    try {
+      response.status(200).json({ tasks: await taskStore.list() });
+    } catch (error) {
+      next(error);
+    }
   });
 
-  app.post('/api/tasks', (request, response) => {
+  app.post('/api/tasks', async (request, response, next) => {
     const { errors, value } = validateTaskPayload(request.body);
 
     if (errors.length > 0) {
       return response.status(400).json({ errors });
     }
 
-    const task = taskStore.create(value);
-    return response.status(201).location(`/api/tasks/${task.id}`).json({ task });
+    try {
+      const task = await taskStore.create(value);
+      return response.status(201).location(`/api/tasks/${task.id}`).json({ task });
+    } catch (error) {
+      return next(error);
+    }
   });
 
-  app.get('/api/tasks/:taskId', (request, response) => {
-    const task = taskStore.findById(request.params.taskId);
+  app.get('/api/tasks/:taskId', async (request, response, next) => {
+    let task;
+    try {
+      task = await taskStore.findById(request.params.taskId);
+    } catch (error) {
+      return next(error);
+    }
 
     if (!task) {
       return response.status(404).json({ error: 'Task not found' });
@@ -42,14 +55,19 @@ function createApp({ taskStore = createTaskStore() } = {}) {
     return response.status(200).json({ task });
   });
 
-  app.patch('/api/tasks/:taskId', (request, response) => {
+  app.patch('/api/tasks/:taskId', async (request, response, next) => {
     const { errors, value } = validateTaskPayload(request.body, { partial: true });
 
     if (errors.length > 0) {
       return response.status(400).json({ errors });
     }
 
-    const task = taskStore.update(request.params.taskId, value);
+    let task;
+    try {
+      task = await taskStore.update(request.params.taskId, value);
+    } catch (error) {
+      return next(error);
+    }
 
     if (!task) {
       return response.status(404).json({ error: 'Task not found' });
@@ -58,8 +76,13 @@ function createApp({ taskStore = createTaskStore() } = {}) {
     return response.status(200).json({ task });
   });
 
-  app.delete('/api/tasks/:taskId', (request, response) => {
-    const removed = taskStore.remove(request.params.taskId);
+  app.delete('/api/tasks/:taskId', async (request, response, next) => {
+    let removed;
+    try {
+      removed = await taskStore.remove(request.params.taskId);
+    } catch (error) {
+      return next(error);
+    }
 
     if (!removed) {
       return response.status(404).json({ error: 'Task not found' });
