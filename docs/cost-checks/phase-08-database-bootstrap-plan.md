@@ -1,11 +1,11 @@
 # Cost Check — Phase 8: database bootstrap plan
 
-**Status:** planned only. No bootstrap IAM role, instance profile, EC2 instance, public IPv4 address or additional EBS volume exists yet.
+**Status:** completed and cleaned up on 2026-09-07. Billing data can be delayed, so the actual cost must be reviewed later in Billing.
 
-## Proposed temporary resources
+## Temporary resources used
 
 - One `t3.micro` EC2 instance.
-- One attached public IPv4 address while it is running, required for outbound connectivity without a NAT Gateway.
+- One attached public IPv4 address while it was running, required for outbound connectivity without a NAT Gateway.
 - One encrypted 8 GiB GP3 root volume, deleted with the instance.
 - One temporary IAM role and instance profile; IAM has no direct hourly charge.
 
@@ -18,12 +18,12 @@
 
 This is separate from the already-running RDS estimate of approximately US$0.51/day.
 
-## Cleanup plan
+## Cleanup result
 
-After the app credential and permissions are validated:
+After the app credential and permissions were validated:
 
-1. Update the regular application EC2 role to the app-password parameter only.
-2. Terminate the bootstrap EC2 and verify its root volume was deleted.
-3. Delete the bootstrap instance profile, inline policy and IAM role.
+1. The regular application EC2 role was updated to the app-password parameter only.
+2. The bootstrap EC2 was terminated and its root volume deletion was verified.
+3. The bootstrap instance profile, inline policy and IAM role were deleted.
 
-Steps 2 and 3 are destructive and require explicit user confirmation.
+RDS and both SecureStrings were preserved. The master-password SecureString remains temporarily until a future application connection test succeeds; it is no longer accessible to any EC2 role.

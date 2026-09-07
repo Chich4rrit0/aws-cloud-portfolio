@@ -21,3 +21,7 @@ Future application EC2 role: read application password only
 - IMDSv2 is required and the root volume is encrypted, 8 GiB GP3 and deleted on termination.
 - PostgreSQL connects with `sslmode=verify-full` and the official RDS CA bundle.
 - The script never echoes either password. It keeps the bootstrap instance running only for validation and then it must be terminated with explicit approval.
+
+## Execution result
+
+The bootstrap was executed successfully through Session Manager. It created the application login and its SecureString parameter, then the regular application EC2 role was reduced to that parameter only. The temporary EC2, root volume, instance profile and IAM role were deleted after validation.

@@ -46,7 +46,7 @@ function Get-InstanceIfExists {
         "Name=tag:Name,Values=$instanceName",
         'Name=instance-state-name,Values=pending,running,stopping,stopped'
     )
-    return @($instances.Reservations.Instances)
+    return @($instances.Reservations | ForEach-Object { $_.Instances })
 }
 
 if (-not $Execute) {
@@ -64,7 +64,7 @@ if (-not $Execute) {
     return
 }
 
-$existingInstances = Get-InstanceIfExists
+$existingInstances = @(Get-InstanceIfExists)
 if ($existingInstances.Count -gt 1) {
     throw "Expected no more than one active bootstrap instance named '$instanceName'."
 }
@@ -124,7 +124,7 @@ $userDataTemplate = @'
 #!/bin/bash
 set -euo pipefail
 
-dnf install -y postgresql15 openssl curl
+dnf install -y postgresql15
 install -d -m 0755 /opt/task-manager/certs
 curl --fail --silent --show-error --location https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem --output /opt/task-manager/certs/rds-global-bundle.pem
 
@@ -164,10 +164,14 @@ $launchArguments = @(
     '--tag-specifications', $instanceTagSpecification, $volumeTagSpecification
 )
 $launch = Invoke-AwsJson -Arguments $launchArguments
+$publicIp = $null
+if ($launch.Instances[0].PSObject.Properties.Name -contains 'PublicIpAddress') {
+    $publicIp = $launch.Instances[0].PublicIpAddress
+}
 
 [PSCustomObject]@{
     Action     = 'Bootstrap instance creation requested'
     InstanceId = $launch.Instances[0].InstanceId
     State      = $launch.Instances[0].State.Name
-    PublicIp   = $launch.Instances[0].PublicIpAddress
+    PublicIp   = $publicIp
 }
