@@ -7,7 +7,9 @@ param(
 
     [switch]$Execute,
 
-    [switch]$CreateNewLaunchTemplateVersion
+    [switch]$CreateNewLaunchTemplateVersion,
+
+    [switch]$EnableCloudWatchLogs
 )
 
 Set-StrictMode -Version Latest
@@ -18,6 +20,7 @@ $appSecurityGroupName = 'portfolio-p01-sg-app'
 $instanceProfileName = 'portfolio-p01-ec2-profile'
 $dbIdentifier = 'portfolio-p01-postgres'
 $applicationPasswordPath = '/portfolio/project-01/database/app-password'
+$cloudWatchLogGroupName = '/aws/aws-cloud-portfolio/project-01/application'
 $launchTemplateName = 'portfolio-p01-app-launch-template'
 $autoScalingGroupName = 'portfolio-p01-app-asg'
 $amiParameterName = '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64'
@@ -101,8 +104,48 @@ function New-ApplicationUserData {
     param(
         [string]$ArtifactBucket,
         [string]$ArtifactKey,
-        [string]$DbEndpoint
+        [string]$DbEndpoint,
+        [bool]$EnableCloudWatchLogs
     )
+
+    $cloudWatchPackages = if ($EnableCloudWatchLogs) { ' amazon-cloudwatch-agent' } else { '' }
+    $cloudWatchLogSetup = if ($EnableCloudWatchLogs) {
+@"
+install -d -o $applicationUser -g $applicationUser -m 0750 /var/log/task-manager
+
+cat >/opt/task-manager/cloudwatch-agent.json <<'EOF'
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/task-manager/application.log",
+            "log_group_name": "$cloudWatchLogGroupName",
+            "log_stream_name": "{instance_id}/application"
+          },
+          {
+            "file_path": "/var/log/project-01-bootstrap.log",
+            "log_group_name": "$cloudWatchLogGroupName",
+            "log_stream_name": "{instance_id}/bootstrap"
+          }
+        ]
+      }
+    }
+  }
+}
+EOF
+"@
+    }
+    else { '' }
+
+    $cloudWatchServiceStart = if ($EnableCloudWatchLogs) {
+@"
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config -m ec2 -s -c file:/opt/task-manager/cloudwatch-agent.json
+"@
+    }
+    else { '' }
 
     $script = @"
 #!/bin/bash
@@ -112,7 +155,7 @@ exec > >(tee -a /var/log/project-01-bootstrap.log | logger -t project-01-bootstr
 
 # Amazon Linux 2023 already includes curl-minimal. Installing the full curl
 # package conflicts with it, so only the missing runtime packages are added.
-dnf install -y nodejs20 unzip
+dnf install -y nodejs20 unzip$cloudWatchPackages
 
 id -u $applicationUser >/dev/null 2>&1 || useradd --system --create-home --shell /sbin/nologin $applicationUser
 install -d -o root -g $applicationUser -m 0750 /opt/task-manager /opt/task-manager/certs
@@ -126,6 +169,8 @@ npm ci --omit=dev
 curl --fail --silent --show-error --location 'https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem' --output /opt/task-manager/certs/rds-ca.pem
 chown -R root:$applicationUser /opt/task-manager
 chmod -R g-w,o-rwx /opt/task-manager
+
+$cloudWatchLogSetup
 
 cat >/opt/task-manager/start.sh <<'EOF'
 #!/bin/bash
@@ -165,6 +210,8 @@ RestartSec=5
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
+StandardOutput=append:/var/log/task-manager/application.log
+StandardError=append:/var/log/task-manager/application.log
 
 [Install]
 WantedBy=multi-user.target
@@ -172,6 +219,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable --now task-manager.service
+$cloudWatchServiceStart
 "@
 
     return [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($script))
@@ -188,6 +236,7 @@ if (-not $Execute) {
         Deployment             = 'Private S3 release ZIP, application SSM password, PostgreSQL over TLS'
         PublicIpv4             = 'Assigned by the existing public app subnets for outbound SSM, S3 and package retrieval'
         ExistingTemplateAction  = if ($CreateNewLaunchTemplateVersion) { 'Create a replacement bootstrap version and update the existing ASG' } else { 'Reuse existing template and ASG if present' }
+        CloudWatchLogs          = if ($EnableCloudWatchLogs) { "Application and bootstrap logs will be delivered to $cloudWatchLogGroupName" } else { 'Not configured by this invocation' }
     }
     return
 }
@@ -267,7 +316,7 @@ try {
 
     $launchTemplate = Get-ExistingLaunchTemplate
     if ($null -eq $launchTemplate -or $CreateNewLaunchTemplateVersion) {
-        $userData = New-ApplicationUserData -ArtifactBucket $artifactBucket -ArtifactKey $artifact.Key -DbEndpoint $dbInstance.Endpoint.Address
+        $userData = New-ApplicationUserData -ArtifactBucket $artifactBucket -ArtifactKey $artifact.Key -DbEndpoint $dbInstance.Endpoint.Address -EnableCloudWatchLogs:$EnableCloudWatchLogs
         $launchTemplateData = @{
             ImageId = $amiId
             InstanceType = 't3.micro'
@@ -299,7 +348,12 @@ try {
 
         $temporaryFile = New-TemporaryFile
         try {
-            $launchTemplateData | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $temporaryFile -Encoding utf8NoBOM
+            $utf8WithoutBom = New-Object -TypeName System.Text.UTF8Encoding -ArgumentList $false
+            [System.IO.File]::WriteAllText(
+                $temporaryFile,
+                ($launchTemplateData | ConvertTo-Json -Depth 12),
+                $utf8WithoutBom
+            )
             if ($null -eq $launchTemplate) {
                 $createdTemplate = Invoke-AwsJson -Arguments @(
                     'ec2', 'create-launch-template',
@@ -316,7 +370,7 @@ try {
                     'ec2', 'create-launch-template-version',
                     '--launch-template-name', $launchTemplateName,
                     '--source-version', "$($launchTemplate.LatestVersionNumber)",
-                    '--version-description', 'Fix Amazon Linux curl-minimal bootstrap conflict',
+                    '--version-description', $(if ($EnableCloudWatchLogs) { 'Add CloudWatch application and bootstrap log delivery' } else { 'Fix Amazon Linux curl-minimal bootstrap conflict' }),
                     '--launch-template-data', "file://$temporaryFile"
                 )
                 $launchTemplateVersionNumber = $newVersion.LaunchTemplateVersion.VersionNumber
