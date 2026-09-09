@@ -1,0 +1,13 @@
+{
+  "name": "serverless-link-shortener",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local domain logic for the AWS Cloud Portfolio serverless link shortener.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
