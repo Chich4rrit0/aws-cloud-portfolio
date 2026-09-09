@@ -48,10 +48,11 @@ flowchart LR
 - [Modelo DynamoDB](docs/architecture/dynamodb-data-model.md)
 - [Contrato HTTP](docs/architecture/http-api-contract.md)
 - [Controles de abuso](docs/architecture/abuse-controls.md)
+- [Preflight de despliegue](docs/architecture/deployment-preflight.md)
 - [ADRs](docs/decisions/)
 - [Cost Checks](docs/cost-checks/)
 - [Guía de screenshots](docs/screenshots/README.md)
 
 ## Próximo paso
 
-Revisar y aprobar el diseño de datos, contrato HTTP y controles de abuso. Tras ello, inicializaremos el código Node.js y sus pruebas locales; la infraestructura AWS seguirá requiriendo una aprobación separada.
+Revisar y aprobar el preflight de despliegue y su Cost Check. Solo después se solicitará autorización explícita para crear cada recurso AWS.
