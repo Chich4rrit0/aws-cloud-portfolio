@@ -1,19 +1,19 @@
-# Project 01 — Task Manager API
+# Project 01 — Task Manager
 
-Small API used to demonstrate the AWS web-application architecture in this portfolio.
+Aplicación mínima que sirve como carga de trabajo para la arquitectura web AWS del portafolio. Implementa CRUD de tareas y un health check; la complejidad de negocio se mantiene deliberadamente acotada.
 
-## Local development
-
-From `app`:
+## Desarrollo local
 
 ```powershell
-npm install
+Set-Location .\app
+npm ci
+npm test
 npm run dev
 ```
 
-The local application listens on `http://localhost:3000` by default. Express serves the static frontend from `frontend`, while `/api/*` reaches the API. Set `PORT` only through an environment variable when a different port is needed.
+La aplicación escucha en `http://localhost:3000`. Express sirve el frontend estático y expone la API bajo `/api/*`.
 
-## Verification
+## Verificación local
 
 ```powershell
 npm test
@@ -22,26 +22,32 @@ Invoke-RestMethod -Uri 'http://localhost:3000/health'
 
 Open `http://localhost:3000` in a browser to use the frontend.
 
-## API contract (initial version)
+## Contrato API
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/health` | Load balancer and operational health check. |
-| `GET` | `/api/tasks` | List tasks. |
-| `POST` | `/api/tasks` | Create a task. |
-| `GET` | `/api/tasks/:taskId` | Get a task. |
-| `PATCH` | `/api/tasks/:taskId` | Update one or more task fields. |
-| `DELETE` | `/api/tasks/:taskId` | Delete a task. |
+| `GET` | `/health` | Health check operacional. |
+| `GET` | `/api/tasks` | Lista tareas. |
+| `POST` | `/api/tasks` | Crea una tarea. |
+| `GET` | `/api/tasks/:taskId` | Obtiene una tarea. |
+| `PATCH` | `/api/tasks/:taskId` | Edita una tarea. |
+| `DELETE` | `/api/tasks/:taskId` | Elimina una tarea. |
 
 Task fields are `title`, optional `description`, and `status` (`todo`, `in_progress`, or `done`).
 
-## Current limitation
+## Persistencia
 
-Tasks are stored only in memory. They are deliberately lost when the API process restarts. This keeps the first local milestone dependency-free; a repository backed by Amazon RDS for PostgreSQL will replace it in a later phase.
+- Local: `TASK_STORE=memory` es intencional y efímero.
+- Despliegue AWS: `TASK_STORE=postgres`; la API conecta a RDS PostgreSQL con TLS.
 
-## Security baseline
+Las credenciales no existen en archivos del proyecto. La instancia EC2 recupera el secreto de aplicación desde Parameter Store al iniciar el servicio.
 
-- No credentials, passwords, connection strings, or AWS configuration are stored in this project.
-- Request bodies are parsed with a 16 KB limit.
-- The `X-Powered-By` header is disabled.
-- Authentication is deferred until the Amazon Cognito phase.
+## Baseline de seguridad
+
+- No se guardan credenciales, contraseñas, connection strings ni configuración AWS en Git.
+- Request bodies se limitan a 16 KB y `X-Powered-By` está desactivado.
+- No hay autenticación de usuarios en esta versión; Cognito es una evolución planificada.
+
+## Validación desplegada
+
+Desde la raíz del repositorio, `Test-Project01CloudFrontDelivery.ps1` valida HTTPS, health y CRUD contra CloudFront; elimina la tarea temporal creada para la prueba.
