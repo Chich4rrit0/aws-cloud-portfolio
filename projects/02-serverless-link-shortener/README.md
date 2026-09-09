@@ -51,10 +51,11 @@ flowchart LR
 - [Preflight de despliegue](docs/architecture/deployment-preflight.md)
 - [Fundación de datos aplicada](docs/architecture/data-foundation.md)
 - [Fundación de cómputo aplicada](docs/architecture/compute-foundation.md)
+- [Preflight de Cognito](docs/architecture/cognito-preflight.md)
 - [ADRs](docs/decisions/)
 - [Cost Checks](docs/cost-checks/)
 - [Guía de screenshots](docs/screenshots/README.md)
 
 ## Próximo paso
 
-Presentar Cognito y API Gateway para aprobación separada. La Lambda permanecerá bloqueada hasta que autoricemos pruebas controladas.
+Revisar y aprobar la configuración de Cognito. La Lambda permanecerá bloqueada hasta que autoricemos pruebas controladas y API Gateway se evaluará después.
