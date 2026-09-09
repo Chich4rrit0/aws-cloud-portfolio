@@ -15,7 +15,7 @@ Ninguno. Esta fase solo define contratos, límites y decisiones locales.
 ## Controles previstos
 
 - HTTP API: 5 rps, burst 10.
-- Lambda: 128 MiB, timeout 3 s, concurrencia reservada 2.
+- Lambda: 128 MiB, timeout 3 s, concurrencia reservada 0 antes de aprobar pruebas; la cuota actual no permite reservar 2.
 - Logs: siete días de retención.
 - Sin VPC, NAT, EC2, ALB, RDS, CloudFront, WAF, GSI ni streams para el primer despliegue.
 

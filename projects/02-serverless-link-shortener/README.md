@@ -4,7 +4,7 @@ Aplicación serverless para acortar enlaces personales. Complementa el Proyecto 
 
 ## Estado
 
-**Fundación de datos creada; cómputo y API pendientes.** Existen una tabla DynamoDB vacía y un Log Group de CloudWatch del Proyecto 2. No hay Lambda desplegada, endpoints públicos, credenciales de aplicación ni datos persistidos.
+**Cómputo y datos creados; API pendiente.** Existen una tabla DynamoDB vacía, Log Group y Lambda pausada del Proyecto 2. No hay endpoint público, credenciales de aplicación ni datos persistidos.
 
 ## Alcance aprobado
 
@@ -50,10 +50,11 @@ flowchart LR
 - [Controles de abuso](docs/architecture/abuse-controls.md)
 - [Preflight de despliegue](docs/architecture/deployment-preflight.md)
 - [Fundación de datos aplicada](docs/architecture/data-foundation.md)
+- [Fundación de cómputo aplicada](docs/architecture/compute-foundation.md)
 - [ADRs](docs/decisions/)
 - [Cost Checks](docs/cost-checks/)
 - [Guía de screenshots](docs/screenshots/README.md)
 
 ## Próximo paso
 
-Preparar el artefacto Lambda local y presentar el siguiente cambio AWS —rol IAM de mínimo privilegio y función Lambda— para aprobación separada.
+Presentar Cognito y API Gateway para aprobación separada. La Lambda permanecerá bloqueada hasta que autoricemos pruebas controladas.

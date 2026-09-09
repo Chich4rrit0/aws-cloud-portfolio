@@ -7,7 +7,7 @@ El redirect es público y la aplicación puede generar consumo por solicitud. El
 | Capa | Control propuesto | Motivo |
 | --- | --- | --- |
 | API Gateway HTTP API | Throttling por stage: 5 solicitudes/segundo, burst 10. | Limita picos accidentales y pruebas abusivas de bajo volumen. |
-| Lambda | Memoria 128 MiB, timeout 3 segundos y concurrencia reservada 2. | Acota tiempo de cómputo y evita que esta función consuma concurrencia sin límite. |
+| Lambda | Memoria 128 MiB, timeout 3 segundos y concurrencia reservada 0 mientras no exista API. | Pausa toda invocación hasta la fase de pruebas; la cuota actual no admite una reserva positiva. |
 | Handler | Cuerpo máximo 4 KiB, URL máxima 2.048 caracteres y cinco intentos máximos ante colisión. | Evita trabajo o almacenamiento innecesario. |
 | Autorización | JWT Cognito en mutaciones; no hay auto-registro público. | Reduce creación y eliminación no autorizadas. |
 | DynamoDB | On-Demand, sin GSI ni streams inicialmente. | No se mantiene capacidad o componentes adicionales sin uso. |

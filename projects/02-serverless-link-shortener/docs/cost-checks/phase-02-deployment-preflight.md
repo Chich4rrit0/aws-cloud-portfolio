@@ -18,7 +18,7 @@ IAM role y Lambda permission no se esperan como cargos directos. Esto no convier
 
 ## Límites y exclusiones de costo
 
-- Lambda: 128 MiB, timeout 3 s, concurrencia reservada 2.
+- Lambda: 128 MiB, timeout 3 s, concurrencia reservada 0 antes de aprobar pruebas; la cuota actual no permite reservar 2.
 - HTTP API: 5 rps, burst 10.
 - DynamoDB: On-Demand, sin GSI, PITR ni streams.
 - Logs: siete días.
