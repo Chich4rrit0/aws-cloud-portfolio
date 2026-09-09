@@ -45,10 +45,13 @@ flowchart LR
 ## Documentación
 
 - [Blueprint técnico](docs/architecture/serverless-blueprint.md)
+- [Modelo DynamoDB](docs/architecture/dynamodb-data-model.md)
+- [Contrato HTTP](docs/architecture/http-api-contract.md)
+- [Controles de abuso](docs/architecture/abuse-controls.md)
 - [ADRs](docs/decisions/)
 - [Cost Checks](docs/cost-checks/)
 - [Guía de screenshots](docs/screenshots/README.md)
 
 ## Próximo paso
 
-Diseñar el modelo DynamoDB, los contratos HTTP, límites de abuso y la estrategia de autenticación antes de inicializar el código Node.js o crear infraestructura.
+Revisar y aprobar el diseño de datos, contrato HTTP y controles de abuso. Tras ello, inicializaremos el código Node.js y sus pruebas locales; la infraestructura AWS seguirá requiriendo una aprobación separada.
