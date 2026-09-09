@@ -4,7 +4,7 @@ Aplicación serverless para acortar enlaces personales. Complementa el Proyecto 
 
 ## Estado
 
-**Blueprint aprobado; bootstrap local en curso.** No existen recursos AWS de Project 02, código desplegado, credenciales, endpoints ni datos persistidos.
+**Fundación de datos creada; cómputo y API pendientes.** Existen una tabla DynamoDB vacía y un Log Group de CloudWatch del Proyecto 2. No hay Lambda desplegada, endpoints públicos, credenciales de aplicación ni datos persistidos.
 
 ## Alcance aprobado
 
@@ -49,10 +49,11 @@ flowchart LR
 - [Contrato HTTP](docs/architecture/http-api-contract.md)
 - [Controles de abuso](docs/architecture/abuse-controls.md)
 - [Preflight de despliegue](docs/architecture/deployment-preflight.md)
+- [Fundación de datos aplicada](docs/architecture/data-foundation.md)
 - [ADRs](docs/decisions/)
 - [Cost Checks](docs/cost-checks/)
 - [Guía de screenshots](docs/screenshots/README.md)
 
 ## Próximo paso
 
-Revisar y aprobar el preflight de despliegue y su Cost Check. Solo después se solicitará autorización explícita para crear cada recurso AWS.
+Preparar el artefacto Lambda local y presentar el siguiente cambio AWS —rol IAM de mínimo privilegio y función Lambda— para aprobación separada.
