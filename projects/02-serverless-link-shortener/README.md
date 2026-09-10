@@ -4,7 +4,7 @@ Aplicación serverless para acortar enlaces personales. Complementa el Proyecto 
 
 ## Estado
 
-**Cómputo y datos creados; API pendiente.** Existen una tabla DynamoDB vacía, Log Group y Lambda pausada del Proyecto 2. No hay endpoint público, credenciales de aplicación ni datos persistidos.
+**Datos, cómputo e identidad creados; API pendiente.** Existen una tabla DynamoDB vacía, Log Group, Lambda pausada y Cognito sin usuarios del Proyecto 2. No hay endpoint público, credenciales de aplicación ni datos persistidos.
 
 ## Alcance aprobado
 
@@ -52,10 +52,11 @@ flowchart LR
 - [Fundación de datos aplicada](docs/architecture/data-foundation.md)
 - [Fundación de cómputo aplicada](docs/architecture/compute-foundation.md)
 - [Preflight de Cognito](docs/architecture/cognito-preflight.md)
+- [Fundación de Cognito aplicada](docs/architecture/cognito-foundation.md)
 - [ADRs](docs/decisions/)
 - [Cost Checks](docs/cost-checks/)
 - [Guía de screenshots](docs/screenshots/README.md)
 
 ## Próximo paso
 
-Revisar y aprobar la configuración de Cognito. La Lambda permanecerá bloqueada hasta que autoricemos pruebas controladas y API Gateway se evaluará después.
+Crear de forma segura el único administrador de laboratorio y, después, presentar API Gateway para aprobación separada. La Lambda permanecerá bloqueada hasta que autoricemos pruebas controladas.
