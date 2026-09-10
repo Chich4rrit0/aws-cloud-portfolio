@@ -53,10 +53,11 @@ flowchart LR
 - [Fundación de cómputo aplicada](docs/architecture/compute-foundation.md)
 - [Preflight de Cognito](docs/architecture/cognito-preflight.md)
 - [Fundación de Cognito aplicada](docs/architecture/cognito-foundation.md)
+- [Preflight de API Gateway](docs/architecture/api-gateway-preflight.md)
 - [ADRs](docs/decisions/)
 - [Cost Checks](docs/cost-checks/)
 - [Guía de screenshots](docs/screenshots/README.md)
 
 ## Próximo paso
 
-Crear de forma segura el único administrador de laboratorio y, después, presentar API Gateway para aprobación separada. La Lambda permanecerá bloqueada hasta que autoricemos pruebas controladas.
+Revisar y aprobar la exposición controlada mediante API Gateway y la retirada temporal de la pausa de Lambda para pruebas.
