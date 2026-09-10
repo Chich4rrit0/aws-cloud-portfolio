@@ -7,11 +7,11 @@
 
 ## Costo estimado
 
-La configuración no usa SMS, email, MFA avanzado, Identity Pools, federación, add-ons ni replicación. Cognito Lite tiene un free tier vigente de 10.000 MAU directos por mes; en este momento el pool no tiene usuarios activos.
+La configuración no usa SMS, email, MFA avanzado, Identity Pools, federación, add-ons ni replicación. Cognito Lite tiene un free tier vigente de 10.000 MAU directos por mes; el pool tiene un único administrador de laboratorio.
 
 ## Costo real
 
-No hay usuarios, autenticaciones ni tokens emitidos. No se declara costo real porque la facturación es diferida y el uso actual es nulo.
+El usuario fue configurado, pero no se han emitido ni persistido tokens en el proyecto. No se declara costo real porque la facturación es diferida y no se ha verificado actividad de autenticación.
 
 ## Recursos que se pueden apagar o eliminar
 

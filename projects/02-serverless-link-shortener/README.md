@@ -4,7 +4,7 @@ Aplicación serverless para acortar enlaces personales. Complementa el Proyecto 
 
 ## Estado
 
-**Datos, cómputo e identidad creados; API pendiente.** Existen una tabla DynamoDB vacía, Log Group, Lambda pausada y Cognito sin usuarios del Proyecto 2. No hay endpoint público, credenciales de aplicación ni datos persistidos.
+**Datos, cómputo e identidad creados; API pendiente.** Existen una tabla DynamoDB vacía, Log Group, Lambda pausada y Cognito con un administrador de laboratorio del Proyecto 2. No hay endpoint público, tokens persistidos ni datos de aplicación.
 
 ## Alcance aprobado
 
