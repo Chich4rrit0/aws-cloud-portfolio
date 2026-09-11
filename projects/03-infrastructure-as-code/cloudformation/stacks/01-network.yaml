@@ -1,0 +1,250 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Project 03 plan-only reconstruction of the Project 01 VPC. This template creates
+  no resources until an explicitly approved CloudFormation deployment is executed.
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: portfolio-p03
+    Description: Prefix for an isolated future IaC environment. Do not reuse Project 01 names.
+    AllowedPattern: '^[a-z0-9-]+$'
+
+  Environment:
+    Type: String
+    Default: lab
+    AllowedValues:
+      - lab
+    Description: Environment label for resource tags.
+
+  VpcCidr:
+    Type: String
+    Default: 10.20.0.0/16
+    Description: Project 01 reconstruction VPC CIDR.
+
+  AvailabilityZoneA:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: First Availability Zone for the two-AZ design.
+
+  AvailabilityZoneB:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Second Availability Zone for the two-AZ design.
+
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-vpc'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-igw'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref Vpc
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-rt'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PrivateDatabaseRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-db-rt'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  PublicEdgeSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: 10.20.0.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-edge-a'
+        - Key: Tier
+          Value: edge
+
+  PublicEdgeSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneB
+      CidrBlock: 10.20.1.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-edge-b'
+        - Key: Tier
+          Value: edge
+
+  PublicAppSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: 10.20.10.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-app-a'
+        - Key: Tier
+          Value: app
+
+  PublicAppSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneB
+      CidrBlock: 10.20.11.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-app-b'
+        - Key: Tier
+          Value: app
+
+  PrivateDatabaseSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: 10.20.20.0/24
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-db-a'
+        - Key: Tier
+          Value: database
+
+  PrivateDatabaseSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneB
+      CidrBlock: 10.20.21.0/24
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-db-b'
+        - Key: Tier
+          Value: database
+
+  PublicEdgeSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicEdgeSubnetA
+
+  PublicEdgeSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicEdgeSubnetB
+
+  PublicAppSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicAppSubnetA
+
+  PublicAppSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicAppSubnetB
+
+  PrivateDatabaseSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateDatabaseRouteTable
+      SubnetId: !Ref PrivateDatabaseSubnetA
+
+  PrivateDatabaseSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateDatabaseRouteTable
+      SubnetId: !Ref PrivateDatabaseSubnetB
+
+Outputs:
+  VpcId:
+    Description: VPC ID for dependent stacks.
+    Value: !Ref Vpc
+    Export:
+      Name: !Sub '${AWS::StackName}-VpcId'
+
+  PublicEdgeSubnetIds:
+    Description: Public edge subnet IDs for the ALB.
+    Value: !Join [',', [!Ref PublicEdgeSubnetA, !Ref PublicEdgeSubnetB]]
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicEdgeSubnetIds'
+
+  PublicAppSubnetIds:
+    Description: Public app subnet IDs for the Auto Scaling Group.
+    Value: !Join [',', [!Ref PublicAppSubnetA, !Ref PublicAppSubnetB]]
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicAppSubnetIds'
+
+  PrivateDatabaseSubnetIds:
+    Description: Private database subnet IDs for RDS.
+    Value: !Join [',', [!Ref PrivateDatabaseSubnetA, !Ref PrivateDatabaseSubnetB]]
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateDatabaseSubnetIds'

@@ -1,0 +1,41 @@
+# Project 03 — Infrastructure as Code
+
+Reconstrucción declarativa de la arquitectura cerrada del Proyecto 1 mediante **AWS CloudFormation** y **Terraform**. El objetivo es comparar una implementación nativa AWS con una implementación portable, manteniendo el mismo diseño funcional y los mismos límites de seguridad.
+
+## Estado
+
+**Fase 0 — blueprint local aprobado.** Se crearán templates, módulos, parámetros de ejemplo y validaciones de plan. No se aplicará infraestructura AWS durante esta fase, no se importarán recursos existentes y no se modifican los Proyectos 1 o 2.
+
+## Alcance
+
+La representación objetivo incluye la VPC, subnets, Security Groups, IAM, Parameter Store, RDS PostgreSQL de desarrollo, ALB, Launch Template, Auto Scaling Group, buckets S3 privados, CloudFront, CloudWatch Logs y alarma de salud que ya componen el baseline del Proyecto 1.
+
+No se crearán recursos al escribir o validar los archivos. Un despliegue futuro requerirá un Cost Check y aprobación explícita.
+
+## Organización
+
+```text
+cloudformation/
+  stacks/        Templates por capa
+  parameters/    Parámetros de ejemplo sin secretos
+terraform/
+  environments/lab/  Ensamblaje del entorno de laboratorio
+  modules/           Módulos reutilizables por capa
+scripts/             Validación PowerShell, sin apply implícito
+docs/                Arquitectura, ADRs, Cost Checks y evidencia
+```
+
+## Principios de seguridad
+
+- No se versionan contraseñas, JWTs, Access Keys, endpoints sensibles ni archivos de estado Terraform.
+- Ningún template administra ni importa recursos existentes del Proyecto 1 o 2.
+- Terraform empezará con backend local ignorado por Git; no se creará un bucket de estado hasta aprobar una fase específica.
+- CloudFormation y Terraform se validarán antes de cualquier `deploy` o `apply`.
+
+## Documentación
+
+- [Alcance de reconstrucción](docs/architecture/project-01-reconstruction-scope.md)
+- [ADR-001: modo plan e aislamiento](docs/decisions/ADR-001-plan-only-and-isolation.md)
+- [Cost Check de bootstrap](docs/cost-checks/phase-00-bootstrap.md)
+- [Estrategia de validación](docs/validation/plan-only-validation.md)
+- [Validación del template de red](docs/validation/cloudformation-network-validation.md)
