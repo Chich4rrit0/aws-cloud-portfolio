@@ -1,0 +1,6 @@
+# Copy only if a non-default, non-secret value is needed. Do not commit terraform.tfvars.
+# Secrets, passwords, JWTs, account IDs and endpoint values do not belong here.
+
+aws_region     = "us-east-1"
+project_prefix = "p03"
+environment    = "lab"

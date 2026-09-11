@@ -51,3 +51,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación del Edge stack](docs/validation/cloudformation-edge-validation.md)
 - [Diseño del Operations stack](docs/architecture/operations-stack-design.md)
 - [Validación del Operations stack](docs/validation/cloudformation-operations-validation.md)
+- [Diseño de la foundation Terraform](docs/architecture/terraform-foundation.md)
+- [Validación pendiente de la foundation Terraform](docs/validation/terraform-foundation-pending-validation.md)
