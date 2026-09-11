@@ -63,3 +63,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación del módulo Terraform Storage](docs/validation/terraform-storage-validation.md)
 - [Diseño del módulo Terraform Compute](docs/architecture/terraform-compute-module.md)
 - [Validación del módulo Terraform Compute](docs/validation/terraform-compute-validation.md)
+- [Validación del módulo Terraform Operations](docs/validation/terraform-operations-validation.md)
+- [Validación del módulo Terraform Edge](docs/validation/terraform-edge-validation.md)

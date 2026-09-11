@@ -58,3 +58,24 @@ module "compute" {
   database_endpoint_address                    = module.data.endpoint_address
   application_database_password_parameter_name = var.application_database_password_parameter_name
 }
+
+module "operations" {
+  source = "../../modules/operations"
+
+  project_prefix          = var.project_prefix
+  environment             = var.environment
+  load_balancer_full_name = module.compute.load_balancer_full_name
+  target_group_full_name  = module.compute.target_group_full_name
+}
+
+module "edge" {
+  source = "../../modules/edge"
+
+  project_prefix       = var.project_prefix
+  frontend_bucket_name = module.storage.frontend_bucket_name
+  frontend_bucket_arn  = module.storage.frontend_bucket_arn
+  alb_dns_name         = module.compute.load_balancer_dns_name
+  listener_arn         = module.compute.listener_arn
+  target_group_arn     = module.compute.target_group_arn
+  origin_header_value  = var.cloudfront_origin_header_value
+}

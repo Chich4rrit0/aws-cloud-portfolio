@@ -81,3 +81,9 @@ variable "application_artifact_key" {
   type        = string
   default     = "releases/REPLACE_WITH_APPROVED_RELEASE.zip"
 }
+
+variable "cloudfront_origin_header_value" {
+  description = "Sensitive origin-only header, supplied only for an approved deployment."
+  type        = string
+  sensitive   = true
+}
