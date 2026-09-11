@@ -1,0 +1,240 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Project 03 plan-only reconstruction of Project 01 security boundaries and EC2 runtime identity.
+  This template creates no resources until an explicitly approved CloudFormation deployment is executed.
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: portfolio-p03
+    AllowedPattern: '^[a-z0-9-]+$'
+    Description: Prefix for an isolated future IaC environment.
+
+  Environment:
+    Type: String
+    Default: lab
+    AllowedValues:
+      - lab
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID exported by the network stack in a future deployment.
+
+  CloudFrontOriginPrefixListId:
+    Type: String
+    Description: AWS-managed CloudFront origin-facing prefix list ID for the selected region.
+    AllowedPattern: '^pl-[a-z0-9]+$'
+
+  DatabasePasswordParameterName:
+    Type: String
+    Default: /portfolio/project-03/database/password
+    AllowedPattern: '^/.*'
+    Description: SecureString path only. The template never provides its value.
+
+Resources:
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectPrefix}-sg-alb'
+      GroupDescription: Allow CloudFront HTTP traffic only and minimal egress to the application tier.
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        # This local-only rule suppresses EC2's default allow-all egress rule.
+        - Description: Local-only placeholder to remove default egress.
+          IpProtocol: '-1'
+          CidrIp: 127.0.0.1/32
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-sg-alb'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  ApplicationSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectPrefix}-sg-app'
+      GroupDescription: Allow the application port only from the ALB and explicit outbound dependencies.
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - Description: Local-only placeholder to remove default egress.
+          IpProtocol: '-1'
+          CidrIp: 127.0.0.1/32
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-sg-app'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectPrefix}-sg-db'
+      GroupDescription: Allow PostgreSQL only from the application security group.
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - Description: Local-only placeholder to remove default egress.
+          IpProtocol: '-1'
+          CidrIp: 127.0.0.1/32
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-sg-db'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  LoadBalancerIngressFromCloudFront:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: HTTP from the regional CloudFront origin-facing prefix list.
+      GroupId: !GetAtt LoadBalancerSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourcePrefixListId: !Ref CloudFrontOriginPrefixListId
+
+  LoadBalancerEgressToApplication:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: HTTP application port to App security group only.
+      GroupId: !GetAtt LoadBalancerSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 3000
+      ToPort: 3000
+      DestinationSecurityGroupId: !GetAtt ApplicationSecurityGroup.GroupId
+
+  ApplicationIngressFromLoadBalancer:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Application port from ALB security group only.
+      GroupId: !GetAtt ApplicationSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 3000
+      ToPort: 3000
+      SourceSecurityGroupId: !GetAtt LoadBalancerSecurityGroup.GroupId
+
+  ApplicationEgressToDatabase:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: PostgreSQL to Database security group only.
+      GroupId: !GetAtt ApplicationSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      DestinationSecurityGroupId: !GetAtt DatabaseSecurityGroup.GroupId
+
+  ApplicationEgressHttp:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: HTTP egress required by the no-NAT development topology.
+      GroupId: !GetAtt ApplicationSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
+
+  ApplicationEgressHttps:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: HTTPS egress required by the no-NAT development topology.
+      GroupId: !GetAtt ApplicationSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: 0.0.0.0/0
+
+  DatabaseIngressFromApplication:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: PostgreSQL from the application security group only.
+      GroupId: !GetAtt DatabaseSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      SourceSecurityGroupId: !GetAtt ApplicationSecurityGroup.GroupId
+
+  Ec2RuntimeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-ec2-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+      Policies:
+        - PolicyName: ReadDatabasePasswordOnly
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: ReadDatabasePasswordOnly
+                Effect: Allow
+                Action: ssm:GetParameter
+                Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${DatabasePasswordParameterName}'
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub '${ProjectPrefix}-ec2-profile'
+      Roles:
+        - !Ref Ec2RuntimeRole
+
+Outputs:
+  LoadBalancerSecurityGroupId:
+    Description: Security group ID for the Application Load Balancer.
+    Value: !GetAtt LoadBalancerSecurityGroup.GroupId
+    Export:
+      Name: !Sub '${AWS::StackName}-LoadBalancerSecurityGroupId'
+
+  ApplicationSecurityGroupId:
+    Description: Security group ID for Auto Scaling instances.
+    Value: !GetAtt ApplicationSecurityGroup.GroupId
+    Export:
+      Name: !Sub '${AWS::StackName}-ApplicationSecurityGroupId'
+
+  DatabaseSecurityGroupId:
+    Description: Security group ID for RDS PostgreSQL.
+    Value: !GetAtt DatabaseSecurityGroup.GroupId
+    Export:
+      Name: !Sub '${AWS::StackName}-DatabaseSecurityGroupId'
+
+  Ec2RoleArn:
+    Description: Runtime role ARN for application instances.
+    Value: !GetAtt Ec2RuntimeRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-Ec2RoleArn'
+
+  Ec2InstanceProfileName:
+    Description: Instance profile name for the Launch Template.
+    Value: !Ref Ec2InstanceProfile
+    Export:
+      Name: !Sub '${AWS::StackName}-Ec2InstanceProfileName'

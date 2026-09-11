@@ -39,3 +39,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Cost Check de bootstrap](docs/cost-checks/phase-00-bootstrap.md)
 - [Estrategia de validación](docs/validation/plan-only-validation.md)
 - [Validación del template de red](docs/validation/cloudformation-network-validation.md)
+- [Diseño del Security stack](docs/architecture/security-stack-design.md)
+- [Validación del Security stack](docs/validation/cloudformation-security-validation.md)
