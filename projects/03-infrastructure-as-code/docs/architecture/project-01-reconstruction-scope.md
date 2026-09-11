@@ -11,8 +11,9 @@ Este proyecto representa la arquitectura final documentada del Proyecto 1. La fu
 | Network | Stack `network` | Módulo `network` | VPC `10.20.0.0/16`, Internet Gateway, route tables y seis subnets en dos AZ. |
 | Security | Stack `security` | Módulo `security` | Security Groups por capa, roles de EC2 y políticas de mínimo privilegio. |
 | Data | Stack `data` | Módulo `data` | DB subnet group y RDS PostgreSQL Single-AZ de desarrollo. |
+| Storage | Stack `storage` | Módulo `storage` | Buckets S3 privados para artefactos y frontend, sin acceso público. |
 | Compute | Stack `compute` | Módulo `compute` | Launch Template, Target Group, ALB y ASG `min=1`, `desired=1`, `max=2`. |
-| Delivery | Stack `delivery` | Módulo `delivery` | Buckets S3 privados, OAC y distribución CloudFront. |
+| Edge | Stack `edge` | Módulo `edge` | OAC, distribución CloudFront y regla ALB origin-only. |
 | Operations | Stack `operations` | Módulo `operations` | Log Group, alarma de salud y configuración operativa mínima. |
 
 ## Dependencias previstas
@@ -20,10 +21,12 @@ Este proyecto representa la arquitectura final documentada del Proyecto 1. La fu
 ```mermaid
 flowchart LR
     Network --> Security
-    Security --> Data
+    Network --> Data
+    Storage --> Compute
     Security --> Compute
     Data --> Compute
-    Compute --> Delivery
+    Compute --> Edge
+    Storage --> Edge
     Compute --> Operations
 ```
 

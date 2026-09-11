@@ -1,0 +1,366 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Project 03 plan-only reconstruction of Project 01 ALB, Auto Scaling, EC2 bootstrap and application logs.
+  This template creates no resources until an explicitly approved CloudFormation deployment is executed.
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: portfolio-p03
+    AllowedPattern: '^[a-z0-9-]+$'
+
+  Environment:
+    Type: String
+    Default: lab
+    AllowedValues:
+      - lab
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID exported by the network stack.
+
+  PublicEdgeSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Two edge subnet IDs for the internet-facing ALB.
+
+  PublicAppSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Two app subnet IDs for the Auto Scaling Group.
+
+  LoadBalancerSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: ALB Security Group ID exported by the security stack.
+
+  ApplicationSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Application Security Group ID exported by the security stack.
+
+  Ec2InstanceProfileName:
+    Type: String
+    Description: Instance Profile name exported by the security stack.
+
+  ArtifactBucketName:
+    Type: String
+    Description: Private artifact bucket name exported by the storage stack.
+
+  ArtifactKey:
+    Type: String
+    Default: releases/REPLACE_WITH_APPROVED_RELEASE.zip
+    Description: Immutable release ZIP key. Replace only at an approved deployment.
+
+  DatabaseEndpointAddress:
+    Type: String
+    Description: Private RDS endpoint address exported by the data stack.
+
+  DatabasePasswordParameterName:
+    Type: String
+    Default: /portfolio/project-03/database/password
+    AllowedPattern: '^/.*'
+    Description: Application password SecureString path only; the value is never in this template.
+
+  ApplicationLogGroupName:
+    Type: String
+    Default: /aws/aws-cloud-portfolio/project-03/application
+    Description: CloudWatch Log Group for bootstrap and application logs.
+
+  AmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Current Amazon Linux 2023 AMI resolved at deployment time from the public SSM parameter.
+
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro
+    Description: Cost-bounded development instance class.
+
+Resources:
+  ApplicationLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Ref ApplicationLogGroupName
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  Ec2RuntimeAdditionalPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${ProjectPrefix}-runtime-artifacts-and-logs'
+      Roles:
+        - !Sub '${ProjectPrefix}-ec2-role'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ReadReleaseArtifactsOnly
+            Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub 'arn:${AWS::Partition}:s3:::${ArtifactBucketName}/releases/*'
+          - Sid: WriteApplicationLogsOnly
+            Effect: Allow
+            Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${ApplicationLogGroupName}:*'
+
+  ApplicationTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub '${ProjectPrefix}-tg'
+      Port: 3000
+      Protocol: HTTP
+      TargetType: instance
+      VpcId: !Ref VpcId
+      HealthCheckEnabled: true
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      Matcher:
+        HttpCode: '200'
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-tg'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub '${ProjectPrefix}-alb'
+      Type: application
+      Scheme: internet-facing
+      IpAddressType: ipv4
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroupId
+      Subnets: !Ref PublicEdgeSubnetIds
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-alb'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  HttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: '403'
+            ContentType: text/plain
+            MessageBody: Direct origin access denied.
+
+  ApplicationLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub '${ProjectPrefix}-lt'
+      LaunchTemplateData:
+        ImageId: !Ref AmiId
+        InstanceType: !Ref InstanceType
+        IamInstanceProfile:
+          Name: !Ref Ec2InstanceProfileName
+        SecurityGroupIds:
+          - !Ref ApplicationSecurityGroupId
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpTokens: required
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              DeleteOnTermination: true
+              Encrypted: true
+              VolumeSize: 8
+              VolumeType: gp3
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            set -Eeuo pipefail
+
+            exec > >(tee -a /var/log/project-03-bootstrap.log | logger -t project-03-bootstrap -s 2>/dev/console) 2>&1
+
+            # Amazon Linux 2023 includes curl-minimal. Do not install the conflicting full curl package.
+            dnf install -y nodejs20 unzip amazon-cloudwatch-agent
+
+            id -u taskmanager >/dev/null 2>&1 || useradd --system --create-home --shell /sbin/nologin taskmanager
+            install -d -o root -g taskmanager -m 0750 /opt/task-manager /opt/task-manager/certs /var/log/task-manager
+
+            aws s3 cp 's3://${ArtifactBucketName}/${ArtifactKey}' /opt/task-manager/release.zip --region '${AWS::Region}'
+            unzip -oq /opt/task-manager/release.zip -d /opt/task-manager
+
+            cd /opt/task-manager/app
+            npm ci --omit=dev
+
+            curl --fail --silent --show-error --location 'https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem' --output /opt/task-manager/certs/rds-ca.pem
+            chown -R root:taskmanager /opt/task-manager
+            chmod -R g-w,o-rwx /opt/task-manager
+
+            cat >/opt/task-manager/cloudwatch-agent.json <<'EOF'
+            {
+              "logs": {
+                "logs_collected": {
+                  "files": {
+                    "collect_list": [
+                      {
+                        "file_path": "/var/log/task-manager/application.log",
+                        "log_group_name": "${ApplicationLogGroupName}",
+                        "log_stream_name": "{instance_id}/application"
+                      },
+                      {
+                        "file_path": "/var/log/project-03-bootstrap.log",
+                        "log_group_name": "${ApplicationLogGroupName}",
+                        "log_stream_name": "{instance_id}/bootstrap"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+            EOF
+
+            cat >/opt/task-manager/start.sh <<'EOF'
+            #!/bin/bash
+            set -Eeuo pipefail
+
+            export NODE_ENV=production
+            export PORT=3000
+            export TASK_STORE=postgres
+            export DB_HOST='${DatabaseEndpointAddress}'
+            export DB_PORT=5432
+            export DB_NAME=taskmanager
+            export DB_USER=taskmanager_app
+            export DB_SSL=true
+            export DB_SSL_CA_PATH=/opt/task-manager/certs/rds-ca.pem
+            export DB_PASSWORD="$(aws ssm get-parameter --name '${DatabasePasswordParameterName}' --with-decryption --region '${AWS::Region}' --query 'Parameter.Value' --output text)"
+
+            exec /usr/bin/node src/server.js
+            EOF
+
+            chown root:taskmanager /opt/task-manager/start.sh
+            chmod 0750 /opt/task-manager/start.sh
+
+            cat >/etc/systemd/system/task-manager.service <<'EOF'
+            [Unit]
+            Description=AWS Cloud Portfolio Task Manager API
+            After=network-online.target
+            Wants=network-online.target
+
+            [Service]
+            Type=simple
+            User=taskmanager
+            Group=taskmanager
+            WorkingDirectory=/opt/task-manager/app
+            ExecStart=/opt/task-manager/start.sh
+            Restart=on-failure
+            RestartSec=5
+            NoNewPrivileges=true
+            PrivateTmp=true
+            ProtectHome=true
+            StandardOutput=append:/var/log/task-manager/application.log
+            StandardError=append:/var/log/task-manager/application.log
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+
+            systemctl daemon-reload
+            systemctl enable --now task-manager.service
+            /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/task-manager/cloudwatch-agent.json
+
+  ApplicationAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn:
+      - ApplicationLogGroup
+      - Ec2RuntimeAdditionalPolicy
+    Properties:
+      AutoScalingGroupName: !Sub '${ProjectPrefix}-asg'
+      MinSize: '1'
+      DesiredCapacity: '1'
+      MaxSize: '2'
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
+      VPCZoneIdentifier: !Ref PublicAppSubnetIds
+      TargetGroupARNs:
+        - !Ref ApplicationTargetGroup
+      LaunchTemplate:
+        LaunchTemplateId: !Ref ApplicationLaunchTemplate
+        Version: !GetAtt ApplicationLaunchTemplate.LatestVersionNumber
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-app'
+          PropagateAtLaunch: true
+        - Key: Project
+          Value: aws-cloud-portfolio
+          PropagateAtLaunch: true
+        - Key: ProjectNumber
+          Value: '03'
+          PropagateAtLaunch: true
+        - Key: Environment
+          Value: !Ref Environment
+          PropagateAtLaunch: true
+        - Key: ManagedBy
+          Value: cloudformation
+          PropagateAtLaunch: true
+
+Outputs:
+  LoadBalancerArn:
+    Description: ALB ARN for the later Edge and Operations stacks.
+    Value: !Ref ApplicationLoadBalancer
+    Export:
+      Name: !Sub '${AWS::StackName}-LoadBalancerArn'
+
+  LoadBalancerDnsName:
+    Description: ALB DNS name for the later CloudFront origin.
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: !Sub '${AWS::StackName}-LoadBalancerDnsName'
+
+  HttpListenerArn:
+    Description: HTTP listener ARN for the later CloudFront origin guard rule.
+    Value: !Ref HttpListener
+    Export:
+      Name: !Sub '${AWS::StackName}-HttpListenerArn'
+
+  TargetGroupArn:
+    Description: Target Group ARN for ALB health monitoring.
+    Value: !Ref ApplicationTargetGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-TargetGroupArn'
+
+  AutoScalingGroupName:
+    Description: Auto Scaling Group name for controlled scale-out demonstrations.
+    Value: !Ref ApplicationAutoScalingGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-AutoScalingGroupName'
+
+  ApplicationLogGroupName:
+    Description: Log Group name for application and bootstrap logs.
+    Value: !Ref ApplicationLogGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-ApplicationLogGroupName'

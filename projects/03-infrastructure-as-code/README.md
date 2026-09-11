@@ -43,3 +43,7 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación del Security stack](docs/validation/cloudformation-security-validation.md)
 - [Diseño del Data stack](docs/architecture/data-stack-design.md)
 - [Validación del Data stack](docs/validation/cloudformation-data-validation.md)
+- [Diseño del Storage stack](docs/architecture/storage-stack-design.md)
+- [Validación del Storage stack](docs/validation/cloudformation-storage-validation.md)
+- [Diseño del Compute stack](docs/architecture/compute-stack-design.md)
+- [Validación del Compute stack](docs/validation/cloudformation-compute-validation.md)
