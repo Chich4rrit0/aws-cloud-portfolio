@@ -31,3 +31,11 @@ module "data" {
   database_master_username    = var.database_master_username
   database_master_password    = var.database_master_password
 }
+
+module "storage" {
+  source = "../../modules/storage"
+
+  project_prefix = var.project_prefix
+  environment    = var.environment
+  aws_region     = var.aws_region
+}

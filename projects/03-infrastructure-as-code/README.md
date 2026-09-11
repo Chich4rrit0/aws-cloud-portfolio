@@ -59,3 +59,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación del módulo Terraform Security](docs/validation/terraform-security-validation.md)
 - [Diseño del módulo Terraform Data](docs/architecture/terraform-data-module.md)
 - [Validación del módulo Terraform Data](docs/validation/terraform-data-validation.md)
+- [Diseño del módulo Terraform Storage](docs/architecture/terraform-storage-module.md)
+- [Validación del módulo Terraform Storage](docs/validation/terraform-storage-validation.md)

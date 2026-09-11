@@ -35,3 +35,12 @@ output "data" {
     endpoint_port    = module.data.endpoint_port
   }
 }
+
+output "storage" {
+  description = "Private bucket names and ARNs for Compute and Edge modules."
+  value = {
+    artifact_bucket_name = module.storage.artifact_bucket_name
+    frontend_bucket_name = module.storage.frontend_bucket_name
+    frontend_bucket_arn  = module.storage.frontend_bucket_arn
+  }
+}
