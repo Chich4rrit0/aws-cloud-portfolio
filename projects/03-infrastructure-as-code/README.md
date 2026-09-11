@@ -53,3 +53,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación del Operations stack](docs/validation/cloudformation-operations-validation.md)
 - [Diseño de la foundation Terraform](docs/architecture/terraform-foundation.md)
 - [Validación de la foundation Terraform](docs/validation/terraform-foundation-validation.md)
+- [Diseño del módulo Terraform Network](docs/architecture/terraform-network-module.md)
+- [Validación del módulo Terraform Network](docs/validation/terraform-network-validation.md)

@@ -2,5 +2,10 @@
 # Secrets, passwords, JWTs, account IDs and endpoint values do not belong here.
 
 aws_region     = "us-east-1"
-project_prefix = "p03"
+project_prefix = "portfolio-p03"
 environment    = "lab"
+vpc_cidr       = "10.20.0.0/16"
+
+# Availability-zone labels are account-specific. Confirm them before any plan.
+availability_zone_a = "us-east-1a"
+availability_zone_b = "us-east-1b"

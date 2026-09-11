@@ -12,7 +12,7 @@ variable "aws_region" {
 variable "project_prefix" {
   description = "Short lowercase prefix for isolated Project 03 resource names."
   type        = string
-  default     = "p03"
+  default     = "portfolio-p03"
 
   validation {
     condition     = can(regex("^[a-z0-9-]+$", var.project_prefix))
@@ -29,4 +29,20 @@ variable "environment" {
     condition     = var.environment == "lab"
     error_message = "The approved Project 03 environment is lab."
   }
+}
+
+variable "vpc_cidr" {
+  description = "CIDR for the isolated Project 03 VPC."
+  type        = string
+  default     = "10.20.0.0/16"
+}
+
+variable "availability_zone_a" {
+  description = "First verified availability-zone label for this AWS account."
+  type        = string
+}
+
+variable "availability_zone_b" {
+  description = "Second verified availability-zone label for this AWS account."
+  type        = string
 }

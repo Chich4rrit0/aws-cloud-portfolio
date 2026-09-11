@@ -4,7 +4,7 @@
 
 Terraform reproduce la misma arquitectura aislada de CloudFormation mediante módulos por capa: `network`, `security`, `data`, `storage`, `compute`, `edge` y `operations`.
 
-El entorno inicial `terraform/environments/lab` fija `us-east-1`, el prefijo `p03`, etiquetas comunes y rangos de compatibilidad para Terraform y el provider AWS. Todavía no invoca módulos ni define recursos: es una base revisable sin efecto en AWS.
+El entorno inicial `terraform/environments/lab` fija `us-east-1`, el prefijo aislado `portfolio-p03`, etiquetas comunes y rangos de compatibilidad para Terraform y el provider AWS. Todavía no invoca módulos fuera de las capas aprobadas ni aplica recursos: es una base revisable sin efecto en AWS.
 
 ## Estado y credenciales
 

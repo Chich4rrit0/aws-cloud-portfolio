@@ -7,3 +7,13 @@ output "deployment_scope" {
   description = "Confirms that this root configuration is for the isolated Project 03 lab."
   value       = "project-03-${var.environment}-${var.aws_region}"
 }
+
+output "network" {
+  description = "Non-sensitive outputs consumed by the remaining Terraform modules."
+  value = {
+    vpc_id                        = module.network.vpc_id
+    public_edge_subnet_ids        = module.network.public_edge_subnet_ids
+    public_application_subnet_ids = module.network.public_application_subnet_ids
+    private_database_subnet_ids   = module.network.private_database_subnet_ids
+  }
+}
