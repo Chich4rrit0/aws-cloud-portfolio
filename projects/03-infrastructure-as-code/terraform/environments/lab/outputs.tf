@@ -27,3 +27,11 @@ output "security" {
     ec2_instance_profile_name       = module.security.ec2_instance_profile_name
   }
 }
+
+output "data" {
+  description = "Non-secret database connection metadata for dependent modules."
+  value = {
+    endpoint_address = module.data.endpoint_address
+    endpoint_port    = module.data.endpoint_port
+  }
+}

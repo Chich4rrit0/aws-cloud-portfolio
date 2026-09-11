@@ -12,3 +12,6 @@ availability_zone_b = "us-east-1b"
 
 # Required only before an approved plan. Do not guess this account/region-specific ID.
 # cloudfront_origin_prefix_list_id = "pl-REPLACE-WITH-VERIFIED-ID"
+
+database_master_username = "portfolio_master"
+# Supply database_master_password through a local secure channel only. Never add it here.

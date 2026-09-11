@@ -57,3 +57,15 @@ variable "database_password_parameter_name" {
   type        = string
   default     = "/portfolio/project-03/database/password"
 }
+
+variable "database_master_username" {
+  description = "RDS master username for a future isolated deployment."
+  type        = string
+  default     = "portfolio_master"
+}
+
+variable "database_master_password" {
+  description = "Sensitive RDS master password, supplied only at an approved deployment time."
+  type        = string
+  sensitive   = true
+}
