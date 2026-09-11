@@ -46,3 +46,14 @@ variable "availability_zone_b" {
   description = "Second verified availability-zone label for this AWS account."
   type        = string
 }
+
+variable "cloudfront_origin_prefix_list_id" {
+  description = "Regional CloudFront origin-facing managed prefix-list ID, supplied only for an approved plan."
+  type        = string
+}
+
+variable "database_password_parameter_name" {
+  description = "SSM SecureString path only; never its value."
+  type        = string
+  default     = "/portfolio/project-03/database/password"
+}

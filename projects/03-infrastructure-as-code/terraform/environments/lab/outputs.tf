@@ -17,3 +17,13 @@ output "network" {
     private_database_subnet_ids   = module.network.private_database_subnet_ids
   }
 }
+
+output "security" {
+  description = "Non-sensitive security and runtime-identity outputs for dependent modules."
+  value = {
+    load_balancer_security_group_id = module.security.load_balancer_security_group_id
+    application_security_group_id   = module.security.application_security_group_id
+    database_security_group_id      = module.security.database_security_group_id
+    ec2_instance_profile_name       = module.security.ec2_instance_profile_name
+  }
+}

@@ -9,3 +9,6 @@ vpc_cidr       = "10.20.0.0/16"
 # Availability-zone labels are account-specific. Confirm them before any plan.
 availability_zone_a = "us-east-1a"
 availability_zone_b = "us-east-1b"
+
+# Required only before an approved plan. Do not guess this account/region-specific ID.
+# cloudfront_origin_prefix_list_id = "pl-REPLACE-WITH-VERIFIED-ID"

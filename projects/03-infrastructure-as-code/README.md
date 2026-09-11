@@ -55,3 +55,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación de la foundation Terraform](docs/validation/terraform-foundation-validation.md)
 - [Diseño del módulo Terraform Network](docs/architecture/terraform-network-module.md)
 - [Validación del módulo Terraform Network](docs/validation/terraform-network-validation.md)
+- [Diseño del módulo Terraform Security](docs/architecture/terraform-security-module.md)
+- [Validación del módulo Terraform Security](docs/validation/terraform-security-validation.md)
