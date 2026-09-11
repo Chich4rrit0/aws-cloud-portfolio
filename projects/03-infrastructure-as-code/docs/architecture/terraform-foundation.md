@@ -12,6 +12,8 @@ No hay bloque `backend`; Terraform usará su backend local predeterminado cuando
 
 Las credenciales no son variables Terraform y no se escriben en `.tf`, `.tfvars` o documentación. En una validación futura se usará el perfil local ya configurado solo en la sesión de PowerShell, sin exponer sus valores.
 
-## Próximos controles
+## Controles aplicados
 
-Antes de ejecutar Terraform se debe aprobar su instalación local. Después se ejecutarán `terraform fmt -check`, `terraform init -backend=false` y `terraform validate`; no se ejecutará `plan` contra AWS ni `apply` sin un Cost Check y aprobación explícita.
+Terraform se instaló de forma portable y se validó con `terraform fmt -check`, `terraform init -backend=false` y `terraform validate`. El archivo de lock se conserva en Git para fijar la versión y checksums del provider usado durante la validación.
+
+`terraform plan` contra AWS y `terraform apply` siguen fuera de alcance. Ambos requerirán un Cost Check y aprobación explícita.
