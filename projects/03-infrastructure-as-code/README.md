@@ -65,3 +65,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación del módulo Terraform Compute](docs/validation/terraform-compute-validation.md)
 - [Validación del módulo Terraform Operations](docs/validation/terraform-operations-validation.md)
 - [Validación del módulo Terraform Edge](docs/validation/terraform-edge-validation.md)
+- [Cost Check final](docs/cost-checks/project-03-final-plan-only.md)
+- [Guía de despliegue y teardown](docs/operations/project-03-deployment-and-teardown-guide.md)
