@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Project 03 plan-only reconstruction of Project 01 development RDS PostgreSQL.
+  This template creates no resources until an explicitly approved CloudFormation deployment is executed.
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: portfolio-p03
+    AllowedPattern: '^[a-z0-9-]+$'
+
+  Environment:
+    Type: String
+    Default: lab
+    AllowedValues:
+      - lab
+
+  PrivateDatabaseSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Two private database subnet IDs exported by the network stack.
+
+  DatabaseSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Database Security Group ID exported by the security stack.
+
+  DatabaseName:
+    Type: String
+    Default: taskmanager
+    AllowedPattern: '^[a-z][a-z0-9_]{0,62}$'
+    Description: Initial PostgreSQL database name.
+
+  MasterUsername:
+    Type: String
+    Default: portfolio_master
+    AllowedPattern: '^[a-zA-Z][a-zA-Z0-9_]{0,15}$'
+    Description: Temporary RDS master username; it is not the application runtime identity.
+
+  MasterUserPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 14
+    Description: Supplied only at an approved deployment. Never save this value in Git or parameter example files.
+
+  PostgresEngineVersion:
+    Type: String
+    Default: '18.3'
+    Description: Project 01 development engine version. Confirm regional availability before any deployment.
+
+Resources:
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private subnets for Project 03 RDS PostgreSQL.
+      DBSubnetGroupName: !Sub '${ProjectPrefix}-db-subnet-group'
+      SubnetIds: !Ref PrivateDatabaseSubnetIds
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-db-subnet-group'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  PostgreSqlDatabase:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      DBInstanceIdentifier: !Sub '${ProjectPrefix}-postgres'
+      DBName: !Ref DatabaseName
+      DBInstanceClass: db.t3.micro
+      Engine: postgres
+      EngineVersion: !Ref PostgresEngineVersion
+      MasterUsername: !Ref MasterUsername
+      MasterUserPassword: !Ref MasterUserPassword
+      AllocatedStorage: '20'
+      StorageType: gp3
+      StorageEncrypted: true
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DatabaseSecurityGroupId
+      Port: 5432
+      PubliclyAccessible: false
+      MultiAZ: false
+      BackupRetentionPeriod: 1
+      DeletionProtection: false
+      EnablePerformanceInsights: false
+      MonitoringInterval: 0
+      CopyTagsToSnapshot: false
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-postgres'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+Outputs:
+  DatabaseSubnetGroupName:
+    Description: DB subnet group name for RDS.
+    Value: !Ref DatabaseSubnetGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-DatabaseSubnetGroupName'
+
+  DatabaseEndpointAddress:
+    Description: Private endpoint address for a future compute stack.
+    Value: !GetAtt PostgreSqlDatabase.Endpoint.Address
+    Export:
+      Name: !Sub '${AWS::StackName}-DatabaseEndpointAddress'
+
+  DatabaseEndpointPort:
+    Description: PostgreSQL endpoint port for a future compute stack.
+    Value: !GetAtt PostgreSqlDatabase.Endpoint.Port
+    Export:
+      Name: !Sub '${AWS::StackName}-DatabaseEndpointPort'

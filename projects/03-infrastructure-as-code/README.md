@@ -41,3 +41,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación del template de red](docs/validation/cloudformation-network-validation.md)
 - [Diseño del Security stack](docs/architecture/security-stack-design.md)
 - [Validación del Security stack](docs/validation/cloudformation-security-validation.md)
+- [Diseño del Data stack](docs/architecture/data-stack-design.md)
+- [Validación del Data stack](docs/validation/cloudformation-data-validation.md)
