@@ -69,3 +69,15 @@ variable "database_master_password" {
   type        = string
   sensitive   = true
 }
+
+variable "application_database_password_parameter_name" {
+  description = "SecureString path for the application database user password."
+  type        = string
+  default     = "/portfolio/project-03/database/password"
+}
+
+variable "application_artifact_key" {
+  description = "Approved private S3 release key for a future deployment."
+  type        = string
+  default     = "releases/REPLACE_WITH_APPROVED_RELEASE.zip"
+}

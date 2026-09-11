@@ -39,3 +39,22 @@ module "storage" {
   environment    = var.environment
   aws_region     = var.aws_region
 }
+
+module "compute" {
+  source = "../../modules/compute"
+
+  project_prefix                               = var.project_prefix
+  environment                                  = var.environment
+  vpc_id                                       = module.network.vpc_id
+  public_edge_subnet_ids                       = module.network.public_edge_subnet_ids
+  public_application_subnet_ids                = module.network.public_application_subnet_ids
+  load_balancer_security_group_id              = module.security.load_balancer_security_group_id
+  application_security_group_id                = module.security.application_security_group_id
+  ec2_instance_profile_name                    = module.security.ec2_instance_profile_name
+  ec2_role_name                                = module.security.ec2_role_name
+  artifact_bucket_name                         = module.storage.artifact_bucket_name
+  artifact_bucket_arn                          = module.storage.artifact_bucket_arn
+  artifact_key                                 = var.application_artifact_key
+  database_endpoint_address                    = module.data.endpoint_address
+  application_database_password_parameter_name = var.application_database_password_parameter_name
+}
