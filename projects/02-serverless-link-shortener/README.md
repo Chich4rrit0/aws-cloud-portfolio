@@ -4,7 +4,7 @@ Aplicación serverless para acortar enlaces personales. Complementa el Proyecto 
 
 ## Estado
 
-**Datos, cómputo e identidad creados; API pendiente.** Existen una tabla DynamoDB vacía, Log Group, Lambda pausada y Cognito con un administrador de laboratorio del Proyecto 2. No hay endpoint público, tokens persistidos ni datos de aplicación.
+**Proyecto cerrado.** La validación funcional end-to-end fue aprobada: creación `201`, redirect `302`, eliminación `204`, rechazo `401` sin JWT y limpieza DynamoDB confirmada. No se han persistido JWTs, contraseñas, endpoints ni datos de aplicación en el repositorio.
 
 ## Alcance aprobado
 
@@ -54,10 +54,12 @@ flowchart LR
 - [Preflight de Cognito](docs/architecture/cognito-preflight.md)
 - [Fundación de Cognito aplicada](docs/architecture/cognito-foundation.md)
 - [Preflight de API Gateway](docs/architecture/api-gateway-preflight.md)
+- [Fundación de API Gateway aplicada](docs/architecture/api-gateway-foundation.md)
+- [Cierre y evidencia verificable](docs/project-closure.md)
 - [ADRs](docs/decisions/)
 - [Cost Checks](docs/cost-checks/)
 - [Guía de screenshots](docs/screenshots/README.md)
 
-## Próximo paso
+## Estado posterior al cierre
 
-Revisar y aprobar la exposición controlada mediante API Gateway y la retirada temporal de la pausa de Lambda para pruebas.
+La infraestructura permanece desplegada para fines de demostración, pero no se debe ampliar ni generar tráfico adicional sin un nuevo plan y Cost Check. La limpieza, pausa o destrucción se documenta en el [cierre del proyecto](docs/project-closure.md) y requiere aprobación explícita.

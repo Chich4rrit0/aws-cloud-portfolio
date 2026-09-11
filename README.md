@@ -6,7 +6,7 @@ Portafolio práctico de arquitectura cloud en AWS, construido de forma increment
 
 
 
-## Proyecto destacado
+## Proyectos
 
 
 
@@ -15,6 +15,10 @@ Portafolio práctico de arquitectura cloud en AWS, construido de forma increment
 
 
 Una aplicación web pequeña para demostrar una arquitectura AWS profesional. La prioridad no es la complejidad funcional, sino las decisiones de arquitectura, seguridad, despliegue, operación y documentación.
+
+**02 — Serverless Link Shortener**
+
+Aplicación serverless cerrada que demuestra API Gateway HTTP API, Lambda, DynamoDB On-Demand, Cognito JWT y CloudWatch, sin servidores ni red privada. Su [documentación de cierre](projects/02-serverless-link-shortener/docs/project-closure.md) conserva la evidencia de validación y el Cost Check final.
 
 
 
