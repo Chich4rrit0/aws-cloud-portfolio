@@ -1,0 +1,205 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Project 03 plan-only reconstruction of Project 01 CloudFront delivery, private S3
+  origin access and the ALB origin-only header guard. This template creates no
+  resources until an explicitly approved CloudFormation deployment is executed.
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: p03
+    AllowedPattern: '^[a-z0-9-]+$'
+  Environment:
+    Type: String
+    Default: lab
+    AllowedValues:
+      - lab
+  FrontendBucketName:
+    Type: String
+    Description: Name output by the Storage stack.
+  LoadBalancerDnsName:
+    Type: String
+    Description: DNS name output by the Compute stack, without protocol or path.
+  ListenerArn:
+    Type: String
+    Description: Listener ARN output by the Compute stack.
+  TargetGroupArn:
+    Type: String
+    Description: Target Group ARN output by the Compute stack.
+  OriginHeaderName:
+    Type: String
+    Default: X-Portfolio-Origin-Verify
+    AllowedPattern: '^[A-Za-z0-9-]+$'
+  OriginHeaderValue:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: >-
+      Generate locally at deployment time. Never commit this value, output it or
+      place it in a CloudFormation parameter file.
+  OriginHeaderParameterName:
+    Type: String
+    Default: /portfolio/project-03/cloudfront/alb-origin-header
+    AllowedPattern: '^/[A-Za-z0-9_.\-/]+$'
+
+Resources:
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${ProjectPrefix}-${Environment}-frontend-oac'
+        Description: OAC for the Project 03 private frontend bucket.
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  OriginHeaderParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Ref OriginHeaderParameterName
+      Type: SecureString
+      Tier: Standard
+      Value: !Ref OriginHeaderValue
+      Description: !Sub 'CloudFront to ALB origin guard for ${ProjectPrefix}-${Environment}.'
+      Tags:
+        Project: aws-cloud-portfolio
+        ProjectNumber: '03'
+        Environment: !Ref Environment
+        ManagedBy: cloudformation
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucketName
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontReadOnlyForThisDistribution
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub 'arn:${AWS::Partition}:s3:::${FrontendBucketName}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub 'Project 03 ${Environment} CloudFront delivery.'
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        DefaultRootObject: index.html
+        Origins:
+          - Id: frontend-s3
+            DomainName: !Sub '${FrontendBucketName}.s3.${AWS::Region}.amazonaws.com'
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+          - Id: application-alb
+            DomainName: !Ref LoadBalancerDnsName
+            OriginCustomHeaders:
+              - HeaderName: !Ref OriginHeaderName
+                HeaderValue: !Ref OriginHeaderValue
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: http-only
+              OriginSslProtocols:
+                - TLSv1.2
+        DefaultCacheBehavior:
+          TargetOriginId: frontend-s3
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          MinTTL: 0
+          DefaultTTL: 0
+          MaxTTL: 0
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+        CacheBehaviors:
+          - PathPattern: /api/*
+            TargetOriginId: application-alb
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - POST
+              - PATCH
+              - DELETE
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            MinTTL: 0
+            DefaultTTL: 0
+            MaxTTL: 0
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - '*'
+              Cookies:
+                Forward: all
+          - PathPattern: /health
+            TargetOriginId: application-alb
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            MinTTL: 0
+            DefaultTTL: 0
+            MaxTTL: 0
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+
+  CloudFrontOriginGuardRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ListenerArn
+      Priority: 10
+      Conditions:
+        - Field: http-header
+          HttpHeaderConfig:
+            HttpHeaderName: !Ref OriginHeaderName
+            Values:
+              - !Ref OriginHeaderValue
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroupArn
+
+Outputs:
+  CloudFrontDistributionId:
+    Description: Distribution identifier for controlled invalidations and teardown.
+    Value: !Ref CloudFrontDistribution
+  CloudFrontDomainName:
+    Description: Default HTTPS viewer domain; no custom Route 53 domain is created.
+    Value: !GetAtt CloudFrontDistribution.DomainName
+  OriginAccessControlId:
+    Description: OAC identifier used by the private frontend bucket policy.
+    Value: !GetAtt CloudFrontOriginAccessControl.Id
+  OriginHeaderParameterName:
+    Description: SecureString path only; the value is never output.
+    Value: !Ref OriginHeaderParameter
