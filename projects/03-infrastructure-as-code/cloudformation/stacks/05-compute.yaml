@@ -341,6 +341,12 @@ Outputs:
     Export:
       Name: !Sub '${AWS::StackName}-LoadBalancerDnsName'
 
+  LoadBalancerFullName:
+    Description: CloudWatch ApplicationELB dimension value for the ALB.
+    Value: !GetAtt ApplicationLoadBalancer.LoadBalancerFullName
+    Export:
+      Name: !Sub '${AWS::StackName}-LoadBalancerFullName'
+
   HttpListenerArn:
     Description: HTTP listener ARN for the later CloudFront origin guard rule.
     Value: !Ref HttpListener
@@ -352,6 +358,12 @@ Outputs:
     Value: !Ref ApplicationTargetGroup
     Export:
       Name: !Sub '${AWS::StackName}-TargetGroupArn'
+
+  TargetGroupFullName:
+    Description: CloudWatch ApplicationELB dimension value for the Target Group.
+    Value: !GetAtt ApplicationTargetGroup.TargetGroupFullName
+    Export:
+      Name: !Sub '${AWS::StackName}-TargetGroupFullName'
 
   AutoScalingGroupName:
     Description: Auto Scaling Group name for controlled scale-out demonstrations.

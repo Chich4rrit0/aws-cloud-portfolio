@@ -49,3 +49,5 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Validación del Compute stack](docs/validation/cloudformation-compute-validation.md)
 - [Diseño del Edge stack](docs/architecture/edge-stack-design.md)
 - [Validación del Edge stack](docs/validation/cloudformation-edge-validation.md)
+- [Diseño del Operations stack](docs/architecture/operations-stack-design.md)
+- [Validación del Operations stack](docs/validation/cloudformation-operations-validation.md)

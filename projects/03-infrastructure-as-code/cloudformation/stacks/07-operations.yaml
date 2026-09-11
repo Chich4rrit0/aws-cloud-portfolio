@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Project 03 plan-only reconstruction of the Project 01 target-health CloudWatch alarm.
+  This template creates no resources until an explicitly approved deployment is executed.
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: p03
+    AllowedPattern: '^[a-z0-9-]+$'
+  Environment:
+    Type: String
+    Default: lab
+    AllowedValues:
+      - lab
+  LoadBalancerFullName:
+    Type: String
+    Description: LoadBalancerFullName output from the Compute stack.
+  TargetGroupFullName:
+    Type: String
+    Description: TargetGroupFullName output from the Compute stack.
+
+Resources:
+  NoHealthyTargetsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectPrefix}-${Environment}-alb-no-healthy-targets'
+      AlarmDescription: !Sub >-
+        ${ProjectPrefix}-${Environment} ALB has no healthy application targets for
+        two consecutive minutes. Actions remain disabled until a notification target
+        is explicitly approved.
+      ActionsEnabled: false
+      Namespace: AWS/ApplicationELB
+      MetricName: HealthyHostCount
+      Dimensions:
+        - Name: LoadBalancer
+          Value: !Ref LoadBalancerFullName
+        - Name: TargetGroup
+          Value: !Ref TargetGroupFullName
+      Statistic: Minimum
+      Period: 60
+      EvaluationPeriods: 2
+      DatapointsToAlarm: 2
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: notBreaching
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '03'
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: cloudformation
+
+Outputs:
+  AlarmName:
+    Description: Alarm created without automatic actions or notification targets.
+    Value: !Ref NoHealthyTargetsAlarm
