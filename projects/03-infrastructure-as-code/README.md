@@ -69,3 +69,4 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Guía de despliegue y teardown](docs/operations/project-03-deployment-and-teardown-guide.md)
 - [Auditoría inicial E2E](docs/e2e-readiness/phase-00-environment-audit.md)
 - [Prerequisitos AWS E2E](docs/e2e-readiness/phase-01-aws-prerequisites.md)
+- [Orquestación E2E por etapas](docs/e2e-readiness/phase-02-staged-orchestration.md)
