@@ -21,6 +21,8 @@ shared/artifacts/
 .terraform/
 terraform.tfstate
 terraform.tfstate.*
+*.tfplan
+*.tfplan.json
 *.tfvars
 *.tfvars.json
 crash.log

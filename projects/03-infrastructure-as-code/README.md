@@ -79,3 +79,4 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Runbook E2E por etapas](docs/e2e-readiness/phase-09-execution-runbook.md)
 - [Preflight E2E actual](docs/e2e-readiness/phase-10-current-preflight.md)
 - [Cost Check E2E actual](docs/cost-checks/project-03-e2e-current-estimate.md)
+- [Gate de plan E2E Foundation](docs/e2e-readiness/phase-11-foundation-plan-gate.md)
