@@ -26,17 +26,25 @@ required `cloudfront_origin_prefix_list_id` input.
 
 This supersedes the earlier readiness note that described the list as verified.
 The contradiction is preserved rather than hidden: the current, repeatable
-preflight result is authoritative for an actual deployment.
+CLI result is not sufficient by itself for an actual deployment.
+
+## Console verification
+
+After the CLI result, the operator visually verified the AWS-managed IPv4
+prefix list in the VPC console in `us-east-1`, with owner `AWS` and state
+`Create-complete`. The runtime ID is deliberately not copied into this document
+or Terraform source. It may be supplied only to the current preflight and
+Foundation Terraform process as a local execution value.
 
 ## Decision
 
-Foundation deployment remains blocked. Do not invent an ID and do not replace
-the security-group source with `0.0.0.0/0` merely to proceed. First perform a
-read-only console inspection of VPC **Managed prefix lists** in `us-east-1`
-with owner **AWS**, then either resolve the discovery issue or explicitly
-approve a reviewed alternative edge-security design.
+The prefix-list gate is now satisfied by console evidence, despite the CLI
+discovery anomaly. Do not invent an ID and do not replace the security-group
+source with `0.0.0.0/0`. The next gate is a current cost estimate and an
+explicit approval before Foundation `plan` or `apply`.
 
 ## Reproducibility
 
-Run `scripts/e2e/Test-Project03E2ePreflight.ps1` with the local AWS profile.
-It performs the same checks and reports `OverallReady`; it never mutates AWS.
+Run `scripts/e2e/Test-Project03E2ePreflight.ps1` with the local AWS profile
+and the console-verified prefix-list ID as a transient argument. It performs
+the same checks and reports `OverallReady`; it never mutates AWS.

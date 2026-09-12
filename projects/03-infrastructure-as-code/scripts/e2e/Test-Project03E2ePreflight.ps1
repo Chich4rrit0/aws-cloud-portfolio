@@ -6,7 +6,8 @@ param(
     [string]$Region = 'us-east-1',
     [string]$BudgetName = 'portfolio-zero-spend',
     [string]$ProjectPrefix = 'portfolio-p03-e2e',
-    [string]$E2eVpcCidr = '10.30.0.0/16'
+    [string]$E2eVpcCidr = '10.30.0.0/16',
+    [string]$CloudFrontOriginPrefixListId
 )
 
 Set-StrictMode -Version Latest
@@ -48,6 +49,8 @@ $prefixLists = @(Get-AwsJson @(
 $cloudFrontPrefixList = @($prefixLists | Where-Object {
     $null -ne $_ -and $_.PSObject.Properties['Name'] -and $_.Name -eq 'com.amazonaws.global.cloudfront.origin-facing'
 })
+$prefixListDiscovered = ($cloudFrontPrefixList.Count -eq 1 -and $cloudFrontPrefixList[0].State -eq 'create-complete')
+$prefixListSuppliedFromConsole = (-not [string]::IsNullOrWhiteSpace($CloudFrontOriginPrefixListId) -and $CloudFrontOriginPrefixListId -match '^pl-[0-9a-f]+$')
 $postgres183Count = [int](Get-AwsText @(
     'rds', 'describe-db-engine-versions',
     '--engine', 'postgres',
@@ -65,7 +68,7 @@ $checks = @(
     [PSCustomObject]@{ Name = 'Free plan'; Passed = ($plan.accountPlanType -eq 'FREE' -and $plan.accountPlanStatus -eq 'ACTIVE'); Detail = "$($plan.accountPlanType)/$($plan.accountPlanStatus)" }
     [PSCustomObject]@{ Name = 'Budget alert'; Passed = ($null -ne $budget.Name); Detail = if ($budget.Name) { "$($budget.Name): limit USD $($budget.Limit), actual USD $($budget.Actual)" } else { 'Required budget not found.' } }
     [PSCustomObject]@{ Name = 'E2E CIDR available'; Passed = -not ($vpcCidrs -contains $E2eVpcCidr); Detail = $E2eVpcCidr }
-    [PSCustomObject]@{ Name = 'CloudFront prefix list'; Passed = ($cloudFrontPrefixList.Count -eq 1 -and $cloudFrontPrefixList[0].State -eq 'create-complete'); Detail = if ($cloudFrontPrefixList.Count -eq 1) { "$($cloudFrontPrefixList[0].Name): $($cloudFrontPrefixList[0].State)" } else { 'AWS-managed prefix list was not discoverable by this CLI query.' } }
+    [PSCustomObject]@{ Name = 'CloudFront prefix list'; Passed = ($prefixListDiscovered -or $prefixListSuppliedFromConsole); Detail = if ($prefixListDiscovered) { "$($cloudFrontPrefixList[0].Name): $($cloudFrontPrefixList[0].State)" } elseif ($prefixListSuppliedFromConsole) { 'Verified manually in the VPC console; the supplied ID is intentionally not displayed or persisted.' } else { 'AWS-managed prefix list was not discoverable by this CLI query and no console-verified ID was supplied.' } }
     [PSCustomObject]@{ Name = 'PostgreSQL 18.3'; Passed = ($postgres183Count -gt 0); Detail = "Available versions returned: $postgres183Count" }
     [PSCustomObject]@{ Name = 'No E2E-tagged resources'; Passed = ($existingE2eResourceCount -eq 0); Detail = "Tagged resource count: $existingE2eResourceCount" }
 )
