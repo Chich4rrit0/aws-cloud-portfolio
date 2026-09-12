@@ -109,7 +109,7 @@ resource "aws_launch_template" "application" {
     exec >>/var/log/taskmanager/bootstrap.log 2>&1
     aws s3 cp s3://${var.artifact_bucket_name}/${var.artifact_key} /tmp/release.zip
     unzip -q /tmp/release.zip -d /opt/task-manager
-    cd /opt/task-manager && npm ci --omit=dev
+    cd /opt/task-manager/app && npm ci --omit=dev
     chown -R taskmanager:taskmanager /opt/task-manager
     curl -fsSL https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
       -o /etc/pki/ca-trust/source/anchors/rds-global-bundle.pem
@@ -118,7 +118,7 @@ resource "aws_launch_template" "application" {
     #!/bin/bash
     set -euo pipefail
     export DB_PASSWORD="$(aws ssm get-parameter --name '${var.application_database_password_parameter_name}' --with-decryption --query 'Parameter.Value' --output text)"
-    exec /usr/bin/node /opt/task-manager/src/server.js
+    exec /usr/bin/node /opt/task-manager/app/src/server.js
     SCRIPT
     chmod 0750 /opt/task-manager/start.sh
     chown taskmanager:taskmanager /opt/task-manager/start.sh
@@ -132,7 +132,7 @@ resource "aws_launch_template" "application" {
     Type=simple
     User=taskmanager
     Group=taskmanager
-    WorkingDirectory=/opt/task-manager
+    WorkingDirectory=/opt/task-manager/app
     Environment=PORT=3000
     Environment=DB_HOST=${var.database_endpoint_address}
     Environment=DB_PORT=5432

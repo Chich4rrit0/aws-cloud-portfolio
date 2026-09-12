@@ -72,3 +72,4 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Orquestación E2E por etapas](docs/e2e-readiness/phase-02-staged-orchestration.md)
 - [Validación E2E Foundation](docs/e2e-readiness/phase-03-foundation-validation.md)
 - [Diseño E2E de bootstrap PostgreSQL](docs/e2e-readiness/phase-04-database-bootstrap-design.md)
+- [Diseño E2E de publicación de artefactos](docs/e2e-readiness/phase-05-artifact-publication-design.md)
