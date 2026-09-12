@@ -75,3 +75,4 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Diseño E2E de publicación de artefactos](docs/e2e-readiness/phase-05-artifact-publication-design.md)
 - [Validación E2E Runtime](docs/e2e-readiness/phase-06-runtime-validation.md)
 - [Diseño y validación E2E Edge](docs/e2e-readiness/phase-07-edge-validation.md)
+- [Bootstrap E2E ejecutable y seguro](docs/e2e-readiness/phase-08-bootstrap-script-validation.md)
