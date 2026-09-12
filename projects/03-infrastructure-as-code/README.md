@@ -77,3 +77,4 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Diseño y validación E2E Edge](docs/e2e-readiness/phase-07-edge-validation.md)
 - [Bootstrap E2E ejecutable y seguro](docs/e2e-readiness/phase-08-bootstrap-script-validation.md)
 - [Runbook E2E por etapas](docs/e2e-readiness/phase-09-execution-runbook.md)
+- [Preflight E2E actual](docs/e2e-readiness/phase-10-current-preflight.md)
