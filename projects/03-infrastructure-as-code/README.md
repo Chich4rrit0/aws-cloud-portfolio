@@ -71,3 +71,4 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Prerequisitos AWS E2E](docs/e2e-readiness/phase-01-aws-prerequisites.md)
 - [Orquestación E2E por etapas](docs/e2e-readiness/phase-02-staged-orchestration.md)
 - [Validación E2E Foundation](docs/e2e-readiness/phase-03-foundation-validation.md)
+- [Diseño E2E de bootstrap PostgreSQL](docs/e2e-readiness/phase-04-database-bootstrap-design.md)
