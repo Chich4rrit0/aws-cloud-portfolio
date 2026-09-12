@@ -5,6 +5,18 @@ resource "aws_cloudfront_origin_access_control" "frontend" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_ssm_parameter" "origin_header" {
+  name  = var.origin_header_parameter_name
+  type  = "SecureString"
+  value = var.origin_header_value
+
+  tags = {
+    Name        = "${var.project_prefix}-cloudfront-origin-header"
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
 resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   default_root_object  = "index.html"

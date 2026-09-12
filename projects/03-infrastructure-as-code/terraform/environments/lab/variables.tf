@@ -87,3 +87,9 @@ variable "cloudfront_origin_header_value" {
   type        = string
   sensitive   = true
 }
+
+variable "cloudfront_origin_header_parameter_name" {
+  description = "SecureString parameter name for the CloudFront-to-ALB origin header."
+  type        = string
+  default     = "/portfolio/project-03/cloudfront/origin-header"
+}

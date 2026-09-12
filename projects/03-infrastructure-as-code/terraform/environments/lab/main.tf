@@ -71,11 +71,13 @@ module "operations" {
 module "edge" {
   source = "../../modules/edge"
 
-  project_prefix       = var.project_prefix
-  frontend_bucket_name = module.storage.frontend_bucket_name
-  frontend_bucket_arn  = module.storage.frontend_bucket_arn
-  alb_dns_name         = module.compute.load_balancer_dns_name
-  listener_arn         = module.compute.listener_arn
-  target_group_arn     = module.compute.target_group_arn
-  origin_header_value  = var.cloudfront_origin_header_value
+  project_prefix               = var.project_prefix
+  environment                  = "lab"
+  frontend_bucket_name         = module.storage.frontend_bucket_name
+  frontend_bucket_arn          = module.storage.frontend_bucket_arn
+  alb_dns_name                 = module.compute.load_balancer_dns_name
+  listener_arn                 = module.compute.listener_arn
+  target_group_arn             = module.compute.target_group_arn
+  origin_header_parameter_name = var.cloudfront_origin_header_parameter_name
+  origin_header_value          = var.cloudfront_origin_header_value
 }
