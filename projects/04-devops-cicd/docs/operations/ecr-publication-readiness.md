@@ -1,14 +1,14 @@
 # Preparación para publicación a ECR
 
-## Recurso propuesto
+## Recurso creado
 
-Un único repositorio privado, aislado, en `us-east-1`:
+Se creó un único repositorio privado, aislado, en `us-east-1`:
 
 ```text
 portfolio-p04-task-manager
 ```
 
-## Configuración propuesta
+## Configuración aplicada
 
 | Control | Valor | Razón |
 |---|---|---|
@@ -18,6 +18,10 @@ portfolio-p04-task-manager
 | Lifecycle policy | Conservar como máximo 10 imágenes etiquetadas | Limita almacenamiento acumulado. |
 | Tags | Project, ProjectNumber, Environment, ManagedBy | Facilita inventario y cleanup. |
 
+La política de ciclo de vida conserva como máximo diez imágenes con etiqueta
+`sha-` y elimina imágenes sin etiqueta tras un día. El repositorio se creó
+vacío: todavía no hay imágenes, capas ni publicación desde GitHub.
+
 El valor local de referencia fue una imagen de aproximadamente 49.6 MB. Eso
 no garantiza su tamaño comprimido final en ECR; conservar hasta diez versiones
 es un límite preventivo, no una estimación de costo.
@@ -25,9 +29,9 @@ es un límite preventivo, no una estimación de costo.
 ## Publicación futura
 
 La ruta de CI actual solo construye la imagen. La publicación requerirá una
-segunda etapa, bloqueada hasta que la primera tenga éxito, y una identidad OIDC
-de mínimo privilegio para autenticarse sin Access Keys. OIDC no será creado en
-el mismo paso que el repositorio sin revisar por separado su trust policy.
+segunda etapa manual y una identidad OIDC de mínimo privilegio para
+autenticarse sin Access Keys. El proveedor y el rol OIDC siguen pendientes;
+su diseño detallado está en `github-oidc-ecr-publisher.md`.
 
 ## Verificación posterior a una creación aprobada
 
