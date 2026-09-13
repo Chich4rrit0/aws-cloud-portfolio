@@ -4,6 +4,13 @@
 
 Ninguno. Esta fase solo crea documentación local.
 
+## Auditoría previa a ECR
+
+El 2026-09-13 se verificó por AWS CLI, de forma exclusiva de lectura, que no
+existen repositorios ECR en `us-east-1`. El presupuesto
+`portfolio-zero-spend` mostraba gasto real `0.00` sobre su límite mensual de
+USD 1.00.
+
 ## Recursos con posible costo futuro
 
 - ECR: almacenamiento de imágenes y solicitudes.
@@ -12,8 +19,11 @@ Ninguno. Esta fase solo crea documentación local.
 - CloudWatch Logs: ingestión y almacenamiento.
 - Transferencia de datos: depende de uso y región.
 
-Los valores son categorías de riesgo, no precios ni costos reales. Se deben
-consultar precios vigentes en `us-east-1` antes de autorizar una prueba E2E.
+ECR no tiene una instancia que se mantenga activa, pero el almacenamiento de
+imágenes privadas sí puede generar cargos. AWS informa 500 MB mensuales de
+Free Tier para nuevos clientes de ECR privado durante un año; la elegibilidad
+real se debe verificar en la cuenta y no se asume. El almacenamiento, las
+solicitudes y transferencia fuera de región siguen siendo riesgos de costo.
 
 ## Controles previstos
 

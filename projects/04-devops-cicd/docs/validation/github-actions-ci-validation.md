@@ -26,10 +26,14 @@ como una falla del código, imagen o AWS.
 
 ## Próxima verificación requerida
 
-Revisar la página de la ejecución en GitHub y la disponibilidad/cuota de
-GitHub Actions de la cuenta. Una vez que un run pueda crear el job
-`test-and-build`, se repetirá la validación antes de habilitar publicación a
-ECR o despliegue a ECS.
+El bloqueo de facturación se resolvió y se repitió la ejecución manual. El run
+completó correctamente el job `test-and-build`: checkout, Node.js, `npm ci`,
+las seis pruebas del backend y Docker build. La evidencia está disponible en
+el historial de GitHub Actions del repositorio.
+
+La puerta de CI queda aprobada para preparar la publicación futura a ECR. La
+publicación y cualquier despliegue a ECS continúan pendientes de un Cost Check
+y una autorización AWS específica.
 
 ## Deliberadamente no realizado
 

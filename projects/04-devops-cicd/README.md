@@ -23,9 +23,9 @@ en este directorio.
 
 ## Estado
 
-**Fase 1 — contenedor local validado.** La imagen se construyó y su endpoint
-de salud fue verificado en Docker Desktop. Aún no existe workflow de GitHub
-Actions ni infraestructura AWS para este proyecto.
+**Fase 2 — CI validado y ECR preparado.** La imagen se validó localmente y el
+workflow de GitHub Actions completó pruebas y Docker build. No existe todavía
+infraestructura AWS ni publicación de imágenes para este proyecto.
 
 ## Principios
 
@@ -48,6 +48,7 @@ Actions ni infraestructura AWS para este proyecto.
 - [CI con GitHub Actions](docs/operations/github-actions-ci.md)
 - [Resultado de validación CI](docs/validation/github-actions-ci-validation.md)
 - [Topología futura de entrega AWS](docs/architecture/aws-delivery-topology.md)
+- [Preparación para publicación a ECR](docs/operations/ecr-publication-readiness.md)
 
 ## Próximo checkpoint
 
