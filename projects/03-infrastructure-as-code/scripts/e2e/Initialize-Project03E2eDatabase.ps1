@@ -80,7 +80,7 @@ function Write-Utf8JsonFile {
         [Parameter(Mandatory)][object]$Value
     )
 
-    $json = $Value | ConvertTo-Json -Depth 10
+    $json = ConvertTo-Json -InputObject $Value -Depth 10
     [System.IO.File]::WriteAllText($Path, $json, [System.Text.UTF8Encoding]::new($false))
 }
 
@@ -143,7 +143,7 @@ function Remove-BootstrapResources {
     if ($TemporaryMasterParameterName) {
         Invoke-AwsBestEffort @('ssm', 'delete-parameter', '--name', $TemporaryMasterParameterName) | Out-Null
     }
-    if ($DatabaseSecurityGroupId -and $SecurityGroupId -and $DatabaseIngressRulesFile) {
+    if ($DatabaseSecurityGroupId -and $SecurityGroupId -and $DatabaseIngressRulesFile -and (Test-Path -LiteralPath $DatabaseIngressRulesFile)) {
         Invoke-AwsBestEffort @('ec2', 'revoke-security-group-ingress', '--group-id', $DatabaseSecurityGroupId, '--ip-permissions', "file://$DatabaseIngressRulesFile") | Out-Null
     }
     if ($InstanceProfileName -and $RoleName) {
