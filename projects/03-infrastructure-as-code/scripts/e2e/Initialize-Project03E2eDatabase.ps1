@@ -74,6 +74,16 @@ function Invoke-AwsBestEffort {
     return $LASTEXITCODE -eq 0
 }
 
+function Write-Utf8JsonFile {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][object]$Value
+    )
+
+    $json = $Value | ConvertTo-Json -Depth 10
+    [System.IO.File]::WriteAllText($Path, $json, [System.Text.UTF8Encoding]::new($false))
+}
+
 function Wait-ForSsmManagedInstance {
     param([Parameter(Mandatory)][string]$InstanceId)
 
@@ -180,16 +190,16 @@ try {
     $instanceTagsFile = Join-Path $temporaryDirectory 'instance-tags.json'
     $commandParametersFile = Join-Path $temporaryDirectory 'command-parameters.json'
 
-    @{
+    Write-Utf8JsonFile -Path $trustPolicyFile -Value @{
         Version = '2012-10-17'
         Statement = @(@{
             Effect = 'Allow'
             Principal = @{ Service = 'ec2.amazonaws.com' }
             Action = 'sts:AssumeRole'
         })
-    } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $trustPolicyFile -Encoding utf8
+    }
 
-    @{
+    Write-Utf8JsonFile -Path $bootstrapPolicyFile -Value @{
         Version = '2012-10-17'
         Statement = @(@{
             Sid = 'ReadTemporaryMasterPassword'
@@ -202,14 +212,14 @@ try {
             Action = @('ssm:PutParameter')
             Resource = "arn:aws:ssm:$Region`:$accountId`:parameter$ApplicationPasswordParameterName"
         })
-    } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $bootstrapPolicyFile -Encoding utf8
+    }
 
-    @(@{
+    Write-Utf8JsonFile -Path $defaultEgressFile -Value @(@{
         IpProtocol = '-1'
         IpRanges = @(@{ CidrIp = '0.0.0.0/0' })
-    }) | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $defaultEgressFile -Encoding utf8
+    })
 
-    @(@{
+    Write-Utf8JsonFile -Path $egressRulesFile -Value @(@{
         IpProtocol = 'tcp'
         FromPort = 5432
         ToPort = 5432
@@ -219,9 +229,9 @@ try {
         FromPort = 443
         ToPort = 443
         IpRanges = @(@{ CidrIp = '0.0.0.0/0'; Description = 'HTTPS for Session Manager and Parameter Store' })
-    }) | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $egressRulesFile -Encoding utf8
+    })
 
-    @(@{
+    Write-Utf8JsonFile -Path $instanceTagsFile -Value @(@{
         ResourceType = 'instance'
         Tags = @(
             @{ Key = 'Name'; Value = $resourceNames.InstanceName },
@@ -239,7 +249,7 @@ try {
             @{ Key = 'Environment'; Value = 'e2e' },
             @{ Key = 'Purpose'; Value = 'temporary-database-bootstrap' }
         )
-    }) | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $instanceTagsFile -Encoding utf8
+    })
 
     Invoke-Aws @('ssm', 'put-parameter', '--name', $TemporaryMasterPasswordParameterName, '--type', 'SecureString', '--value', $masterPasswordPlainText) | Out-Null
     $temporaryMasterParameterNameCreated = $TemporaryMasterPasswordParameterName
@@ -255,12 +265,12 @@ try {
     Invoke-Aws @('ec2', 'create-tags', '--resources', $securityGroupId, '--tags', "Key=Name,Value=$($resourceNames.SecurityGroupName)", 'Key=Project,Value=aws-cloud-portfolio', 'Key=ProjectNumber,Value=03', 'Key=Environment,Value=e2e', 'Key=Purpose,Value=temporary-database-bootstrap') | Out-Null
     Invoke-Aws @('ec2', 'revoke-security-group-egress', '--group-id', $securityGroupId, '--ip-permissions', "file://$defaultEgressFile") | Out-Null
     Invoke-Aws @('ec2', 'authorize-security-group-egress', '--group-id', $securityGroupId, '--ip-permissions', "file://$egressRulesFile") | Out-Null
-    @(@{
+    Write-Utf8JsonFile -Path $databaseIngressRulesFile -Value @(@{
         IpProtocol = 'tcp'
         FromPort = 5432
         ToPort = 5432
         UserIdGroupPairs = @(@{ GroupId = $securityGroupId; Description = 'Temporary Project 03 E2E database bootstrap only' })
-    }) | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $databaseIngressRulesFile -Encoding utf8
+    })
     Invoke-Aws @('ec2', 'authorize-security-group-ingress', '--group-id', $DatabaseSecurityGroupId, '--ip-permissions', "file://$databaseIngressRulesFile") | Out-Null
 
     Start-Sleep -Seconds 10
@@ -308,7 +318,7 @@ unset PGPASSWORD master_password app_password
         Replace('__DATABASE_NAME__', $DatabaseName).
         Replace('__MASTER_USERNAME__', $MasterUsername).
         Replace('__REGION__', $Region)
-    @{ commands = @($remoteScript) } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $commandParametersFile -Encoding utf8
+    Write-Utf8JsonFile -Path $commandParametersFile -Value @{ commands = @($remoteScript) }
 
     $commandId = Get-AwsText @(
         'ssm', 'send-command',
