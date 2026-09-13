@@ -308,7 +308,6 @@ GRANT CONNECT ON DATABASE __DATABASE_NAME__ TO taskmanager_app;
 GRANT USAGE, CREATE ON SCHEMA public TO taskmanager_app;
 SQL
 aws ssm put-parameter --name __APPLICATION_PARAMETER__ --type SecureString --value "$app_password" --region __REGION__
-aws ssm delete-parameter --name __MASTER_PARAMETER__ --region __REGION__
 unset PGPASSWORD master_password app_password
 '@
     $remoteScript = $remoteScriptTemplate.
