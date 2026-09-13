@@ -2,12 +2,19 @@
 
 ## Recursos creados
 
-Ninguno. Esta fase solo crea documentación local.
+- Repositorio ECR privado `portfolio-p04-task-manager` en `us-east-1`, vacío.
+- Proveedor IAM OIDC para `token.actions.githubusercontent.com`.
+- Rol IAM `portfolio-p04-github-actions-ecr-publisher`, limitado a publicación
+  en el repositorio ECR del Proyecto 4 desde GitHub Actions en `main`.
+
+No se crearon tareas ECS/Fargate, ALB, red, logs, secretos, ni imágenes ECR.
 
 ## Auditoría previa a ECR
 
-El 2026-09-13 se verificó por AWS CLI, de forma exclusiva de lectura, que no
-existen repositorios ECR en `us-east-1`. El presupuesto
+Antes de crear ECR se verificó por AWS CLI, de forma exclusiva de lectura, que
+no existían repositorios ECR en `us-east-1`. Después de la creación aprobada
+se verificó que el repositorio existe, mantiene tags inmutables y contiene cero
+imágenes. El presupuesto
 `portfolio-zero-spend` mostraba gasto real `0.00` sobre su límite mensual de
 USD 1.00.
 
@@ -19,11 +26,13 @@ USD 1.00.
 - CloudWatch Logs: ingestión y almacenamiento.
 - Transferencia de datos: depende de uso y región.
 
-ECR no tiene una instancia que se mantenga activa, pero el almacenamiento de
-imágenes privadas sí puede generar cargos. AWS informa 500 MB mensuales de
-Free Tier para nuevos clientes de ECR privado durante un año; la elegibilidad
-real se debe verificar en la cuenta y no se asume. El almacenamiento, las
-solicitudes y transferencia fuera de región siguen siendo riesgos de costo.
+IAM OIDC y el rol no ejecutan cómputo ni almacenan imágenes; no se espera un
+cargo directo por ellos. ECR no tiene una instancia que se mantenga activa,
+pero el almacenamiento de imágenes privadas sí puede generar cargos. AWS
+informa 500 MB mensuales de Free Tier para nuevos clientes de ECR privado
+durante un año; la elegibilidad real se debe verificar en la cuenta y no se
+asume. El almacenamiento, las solicitudes y transferencia fuera de región
+siguen siendo riesgos de costo.
 
 ## Controles previstos
 
