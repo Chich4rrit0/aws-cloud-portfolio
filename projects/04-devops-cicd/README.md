@@ -49,10 +49,13 @@ commit. No existe infraestructura ECS/Fargate, ALB o red para este proyecto.
 - [CI con GitHub Actions](docs/operations/github-actions-ci.md)
 - [Resultado de validación CI](docs/validation/github-actions-ci-validation.md)
 - [Topología futura de entrega AWS](docs/architecture/aws-delivery-topology.md)
+- [Diseño del laboratorio ECS/Fargate](docs/architecture/temporary-ecs-fargate-lab-design.md)
 - [Preparación para publicación a ECR](docs/operations/ecr-publication-readiness.md)
 - [Diseño de publicador OIDC](docs/operations/github-oidc-ecr-publisher.md)
 - [Validación IAM OIDC](docs/validation/github-oidc-iam-validation.md)
 - [Validación de publicación ECR](docs/validation/ecr-publication-validation.md)
+- [ADR-002: laboratorio ECS/Fargate](docs/decisions/ADR-002-temporary-ecs-fargate-lab.md)
+- [Cost Check predespliegue ECS](docs/cost-checks/phase-01-ecs-lab-plan.md)
 
 ## Próximo checkpoint
 
