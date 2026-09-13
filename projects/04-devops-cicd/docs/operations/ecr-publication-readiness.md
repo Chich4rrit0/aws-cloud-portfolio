@@ -41,6 +41,16 @@ su diseño detallado está en `github-oidc-ecr-publisher.md`.
 4. Verificar URI, digest y resultado de escaneo disponible, sin revelar
    credenciales de registro.
 
+## Primera publicación controlada
+
+La primera publicación mediante OIDC se ejecutó manualmente desde `main` y
+terminó correctamente. El workflow autenticó con credenciales temporales,
+construyó la imagen y publicó un único tag `sha-<commit>`. La verificación
+posterior por AWS CLI confirmó una sola imagen, su digest y las dos reglas de
+lifecycle. La evidencia no incluye credenciales de registro ni el ARN de la
+cuenta; está registrada en
+`docs/validation/ecr-publication-validation.md`.
+
 ## Teardown
 
 Eliminar el repositorio requerirá primero retirar las imágenes o una operación

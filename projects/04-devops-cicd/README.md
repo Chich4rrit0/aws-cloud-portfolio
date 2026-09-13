@@ -23,9 +23,10 @@ en este directorio.
 
 ## Estado
 
-**Fase 2 — CI validado y ECR preparado.** La imagen se validó localmente y el
-workflow de GitHub Actions completó pruebas y Docker build. No existe todavía
-infraestructura AWS ni publicación de imágenes para este proyecto.
+**Fase 3 — imagen publicada y validada en ECR.** La imagen se validó localmente,
+el workflow de GitHub Actions completó pruebas y Docker build, y una ejecución
+manual OIDC publicó una única imagen privada con tag inmutable derivado del
+commit. No existe infraestructura ECS/Fargate, ALB o red para este proyecto.
 
 ## Principios
 
@@ -49,9 +50,12 @@ infraestructura AWS ni publicación de imágenes para este proyecto.
 - [Resultado de validación CI](docs/validation/github-actions-ci-validation.md)
 - [Topología futura de entrega AWS](docs/architecture/aws-delivery-topology.md)
 - [Preparación para publicación a ECR](docs/operations/ecr-publication-readiness.md)
+- [Diseño de publicador OIDC](docs/operations/github-oidc-ecr-publisher.md)
+- [Validación IAM OIDC](docs/validation/github-oidc-iam-validation.md)
+- [Validación de publicación ECR](docs/validation/ecr-publication-validation.md)
 
 ## Próximo checkpoint
 
-Verificar Docker y GitHub CLI locales. Si están disponibles, se implementará
-la imagen reproducible y sus pruebas locales antes de diseñar cualquier
-identidad AWS o workflow remoto.
+Diseñar la demostración temporal ECS/Fargate y ALB con presupuesto, controles
+de seguridad y teardown explícito. No se creará infraestructura de cómputo o
+red sin una aprobación independiente.

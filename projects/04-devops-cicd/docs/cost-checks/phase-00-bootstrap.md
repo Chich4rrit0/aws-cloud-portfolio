@@ -9,6 +9,12 @@
 
 No se crearon tareas ECS/Fargate, ALB, red, logs, secretos, ni imágenes ECR.
 
+Actualización posterior: se publicó una única imagen privada e inmutable en
+ECR mediante el workflow OIDC aprobado. Por lo tanto, ECR deja de estar vacío
+y existe almacenamiento de imagen que debe considerarse en el siguiente Cost
+Check. El presupuesto aún mostraba USD 0.00 al terminar la validación, con la
+advertencia habitual de retraso en los datos de facturación.
+
 ## Auditoría previa a ECR
 
 Antes de crear ECR se verificó por AWS CLI, de forma exclusiva de lectura, que
