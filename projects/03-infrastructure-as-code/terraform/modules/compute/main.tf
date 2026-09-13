@@ -71,6 +71,26 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+# Keep the health endpoint associated with the target group before Edge is
+# deployed. The ALB security group still restricts inbound requests to the
+# CloudFront managed prefix list; Edge later adds the stricter origin header
+# rule with a higher precedence.
+resource "aws_lb_listener_rule" "health" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 20
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.application.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/health"]
+    }
+  }
+}
+
 resource "aws_launch_template" "application" {
   name_prefix   = "${var.project_prefix}-app-"
   image_id      = data.aws_ssm_parameter.amazon_linux_2023.value
@@ -189,4 +209,6 @@ resource "aws_autoscaling_group" "application" {
     id      = aws_launch_template.application.id
     version = "$Latest"
   }
+
+  depends_on = [aws_lb_listener_rule.health]
 }
