@@ -15,7 +15,9 @@ temporary Amazon Linux EC2 instance in an E2E public application subnet.
 
 The instance has no SSH key and no inbound administration rule. Its security
 group permits only PostgreSQL to the isolated E2E RDS security group and HTTPS
-egress for Session Manager and Parameter Store. Its narrowly-scoped IAM role
+egress for Session Manager and Parameter Store. The script creates a matching
+temporary RDS ingress rule for PostgreSQL from that bootstrap group, then
+revokes the rule during cleanup. Its narrowly-scoped IAM role
 can read/delete the temporary master parameter and write only the application
 password parameter.
 

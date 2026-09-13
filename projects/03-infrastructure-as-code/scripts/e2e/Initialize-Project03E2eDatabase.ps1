@@ -119,6 +119,8 @@ function Remove-BootstrapResources {
     param(
         [string]$InstanceId,
         [string]$SecurityGroupId,
+        [string]$DatabaseSecurityGroupId,
+        [string]$DatabaseIngressRulesFile,
         [string]$RoleName,
         [string]$InstanceProfileName,
         [string]$TemporaryMasterParameterName
@@ -130,6 +132,9 @@ function Remove-BootstrapResources {
     }
     if ($TemporaryMasterParameterName) {
         Invoke-AwsBestEffort @('ssm', 'delete-parameter', '--name', $TemporaryMasterParameterName) | Out-Null
+    }
+    if ($DatabaseSecurityGroupId -and $SecurityGroupId -and $DatabaseIngressRulesFile) {
+        Invoke-AwsBestEffort @('ec2', 'revoke-security-group-ingress', '--group-id', $DatabaseSecurityGroupId, '--ip-permissions', "file://$DatabaseIngressRulesFile") | Out-Null
     }
     if ($InstanceProfileName -and $RoleName) {
         Invoke-AwsBestEffort @('iam', 'remove-role-from-instance-profile', '--instance-profile-name', $InstanceProfileName, '--role-name', $RoleName) | Out-Null
@@ -153,6 +158,7 @@ $securityGroupId = $null
 $roleNameCreated = $null
 $instanceProfileNameCreated = $null
 $temporaryMasterParameterNameCreated = $null
+$databaseIngressRulesFile = $null
 $masterPasswordPlainText = $null
 $success = $false
 
@@ -170,6 +176,7 @@ try {
     $bootstrapPolicyFile = Join-Path $temporaryDirectory 'bootstrap-policy.json'
     $defaultEgressFile = Join-Path $temporaryDirectory 'default-egress-rule.json'
     $egressRulesFile = Join-Path $temporaryDirectory 'egress-rules.json'
+    $databaseIngressRulesFile = Join-Path $temporaryDirectory 'database-ingress-rules.json'
     $instanceTagsFile = Join-Path $temporaryDirectory 'instance-tags.json'
     $commandParametersFile = Join-Path $temporaryDirectory 'command-parameters.json'
 
@@ -248,6 +255,13 @@ try {
     Invoke-Aws @('ec2', 'create-tags', '--resources', $securityGroupId, '--tags', "Key=Name,Value=$($resourceNames.SecurityGroupName)", 'Key=Project,Value=aws-cloud-portfolio', 'Key=ProjectNumber,Value=03', 'Key=Environment,Value=e2e', 'Key=Purpose,Value=temporary-database-bootstrap') | Out-Null
     Invoke-Aws @('ec2', 'revoke-security-group-egress', '--group-id', $securityGroupId, '--ip-permissions', "file://$defaultEgressFile") | Out-Null
     Invoke-Aws @('ec2', 'authorize-security-group-egress', '--group-id', $securityGroupId, '--ip-permissions', "file://$egressRulesFile") | Out-Null
+    @(@{
+        IpProtocol = 'tcp'
+        FromPort = 5432
+        ToPort = 5432
+        UserIdGroupPairs = @(@{ GroupId = $securityGroupId; Description = 'Temporary Project 03 E2E database bootstrap only' })
+    }) | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $databaseIngressRulesFile -Encoding utf8
+    Invoke-Aws @('ec2', 'authorize-security-group-ingress', '--group-id', $DatabaseSecurityGroupId, '--ip-permissions', "file://$databaseIngressRulesFile") | Out-Null
 
     Start-Sleep -Seconds 10
     $amiId = Get-AwsText @('ssm', 'get-parameter', '--name', '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64', '--query', 'Parameter.Value')
@@ -310,13 +324,13 @@ unset PGPASSWORD master_password app_password
 catch {
     $failure = $_
     if (-not $RetainOnFailure) {
-        Remove-BootstrapResources -InstanceId $instanceId -SecurityGroupId $securityGroupId -RoleName $roleNameCreated -InstanceProfileName $instanceProfileNameCreated -TemporaryMasterParameterName $temporaryMasterParameterNameCreated
+        Remove-BootstrapResources -InstanceId $instanceId -SecurityGroupId $securityGroupId -DatabaseSecurityGroupId $DatabaseSecurityGroupId -DatabaseIngressRulesFile $databaseIngressRulesFile -RoleName $roleNameCreated -InstanceProfileName $instanceProfileNameCreated -TemporaryMasterParameterName $temporaryMasterParameterNameCreated
     }
     throw $failure
 }
 finally {
     if ($success) {
-        Remove-BootstrapResources -InstanceId $instanceId -SecurityGroupId $securityGroupId -RoleName $roleNameCreated -InstanceProfileName $instanceProfileNameCreated -TemporaryMasterParameterName $temporaryMasterParameterNameCreated
+        Remove-BootstrapResources -InstanceId $instanceId -SecurityGroupId $securityGroupId -DatabaseSecurityGroupId $DatabaseSecurityGroupId -DatabaseIngressRulesFile $databaseIngressRulesFile -RoleName $roleNameCreated -InstanceProfileName $instanceProfileNameCreated -TemporaryMasterParameterName $temporaryMasterParameterNameCreated
     }
     $masterPasswordPlainText = $null
     if (Test-Path -LiteralPath $temporaryDirectory) {
