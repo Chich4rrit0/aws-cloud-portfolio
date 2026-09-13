@@ -45,6 +45,7 @@ Actions ni infraestructura AWS para este proyecto.
 - [Cost Check de bootstrap](docs/cost-checks/phase-00-bootstrap.md)
 - [Validación local del contenedor](docs/operations/local-container-validation.md)
 - [Resultado de validación del contenedor](docs/validation/container-build-validation.md)
+- [CI con GitHub Actions](docs/operations/github-actions-ci.md)
 
 ## Próximo checkpoint
 

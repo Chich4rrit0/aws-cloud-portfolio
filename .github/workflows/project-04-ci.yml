@@ -1,0 +1,51 @@
+name: Project 04 CI
+
+on:
+  pull_request:
+    paths:
+      - 'projects/01-web-task-manager/app/**'
+      - 'projects/04-devops-cicd/**'
+      - '.github/workflows/project-04-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'projects/01-web-task-manager/app/**'
+      - 'projects/04-devops-cicd/**'
+      - '.github/workflows/project-04-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: projects/01-web-task-manager/app
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20.19.2'
+          cache: npm
+          cache-dependency-path: projects/01-web-task-manager/app/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run backend tests
+        run: npm test
+
+      - name: Build container image
+        working-directory: .
+        run: >-
+          docker build --pull
+          --tag portfolio-p04-task-manager:ci-${{ github.sha }}
+          --file projects/04-devops-cicd/docker/Dockerfile
+          projects/01-web-task-manager/app
