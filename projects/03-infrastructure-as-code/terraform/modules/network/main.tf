@@ -1,42 +1,42 @@
 locals {
   subnets = {
     edge_a = {
-      cidr        = "10.20.0.0/24"
+      cidr        = cidrsubnet(var.vpc_cidr, 8, 0)
       az          = var.availability_zones[0]
       public      = true
       tier        = "edge"
       name_suffix = "public-edge-a"
     }
     edge_b = {
-      cidr        = "10.20.1.0/24"
+      cidr        = cidrsubnet(var.vpc_cidr, 8, 1)
       az          = var.availability_zones[1]
       public      = true
       tier        = "edge"
       name_suffix = "public-edge-b"
     }
     app_a = {
-      cidr        = "10.20.10.0/24"
+      cidr        = cidrsubnet(var.vpc_cidr, 8, 10)
       az          = var.availability_zones[0]
       public      = true
       tier        = "app"
       name_suffix = "public-app-a"
     }
     app_b = {
-      cidr        = "10.20.11.0/24"
+      cidr        = cidrsubnet(var.vpc_cidr, 8, 11)
       az          = var.availability_zones[1]
       public      = true
       tier        = "app"
       name_suffix = "public-app-b"
     }
     database_a = {
-      cidr        = "10.20.20.0/24"
+      cidr        = cidrsubnet(var.vpc_cidr, 8, 20)
       az          = var.availability_zones[0]
       public      = false
       tier        = "database"
       name_suffix = "private-db-a"
     }
     database_b = {
-      cidr        = "10.20.21.0/24"
+      cidr        = cidrsubnet(var.vpc_cidr, 8, 21)
       az          = var.availability_zones[1]
       public      = false
       tier        = "database"
