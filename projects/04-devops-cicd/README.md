@@ -46,6 +46,8 @@ Actions ni infraestructura AWS para este proyecto.
 - [Validación local del contenedor](docs/operations/local-container-validation.md)
 - [Resultado de validación del contenedor](docs/validation/container-build-validation.md)
 - [CI con GitHub Actions](docs/operations/github-actions-ci.md)
+- [Resultado de validación CI](docs/validation/github-actions-ci-validation.md)
+- [Topología futura de entrega AWS](docs/architecture/aws-delivery-topology.md)
 
 ## Próximo checkpoint
 
