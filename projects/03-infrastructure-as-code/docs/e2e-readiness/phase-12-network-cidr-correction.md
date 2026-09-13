@@ -24,3 +24,10 @@ non-/16 VPC inputs so this contract cannot silently drift.
 After local Terraform validation, rerun the Foundation plan using the same
 transient inputs. The plan must show only `10.30.x.0/24` subnets before any
 apply is considered.
+
+## Follow-up hygiene
+
+The corrected plan exposed two non-blocking AWS provider deprecation warnings
+for IAM role policy configuration. They are replaced with explicit role-policy
+and role-policy-attachment resources before any apply; this does not change
+the intended least-privilege permissions.

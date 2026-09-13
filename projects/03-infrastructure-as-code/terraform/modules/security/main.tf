@@ -116,13 +116,17 @@ resource "aws_vpc_security_group_ingress_rule" "database_from_application" {
 resource "aws_iam_role" "ec2_runtime" {
   name               = "${var.project_prefix}-ec2-role"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
+}
 
-  managed_policy_arns = ["arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"]
+resource "aws_iam_role_policy_attachment" "ec2_runtime_ssm" {
+  role       = aws_iam_role.ec2_runtime.name
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
 
-  inline_policy {
-    name   = "ReadDatabasePasswordOnly"
-    policy = data.aws_iam_policy_document.database_password_read.json
-  }
+resource "aws_iam_role_policy" "database_password_read" {
+  name   = "ReadDatabasePasswordOnly"
+  role   = aws_iam_role.ec2_runtime.name
+  policy = data.aws_iam_policy_document.database_password_read.json
 }
 
 resource "aws_iam_instance_profile" "ec2_runtime" {
