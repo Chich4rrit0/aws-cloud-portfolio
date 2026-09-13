@@ -69,3 +69,10 @@ Terraform ni recursos de Proyecto 1/2.
 Este Cost Check permite solicitar, pero no implica, una aprobación explícita
 para revisar el plan de Foundation. `terraform apply`, publicación de
 artefactos y teardown destructivo seguirán requiriendo autorizaciones propias.
+
+## Actualización post-Foundation
+
+Foundation se aplicó el 2026-09-12. RDS está disponible y ya genera coste por
+tiempo; los buckets permanecen vacíos y los demás componentes de mayor coste
+(ALB, Runtime y CloudFront) aún no existen. La ventana de teardown del mismo
+día está activa.

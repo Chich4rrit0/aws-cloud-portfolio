@@ -82,3 +82,4 @@ docs/                Arquitectura, ADRs, Cost Checks y evidencia
 - [Gate de plan E2E Foundation](docs/e2e-readiness/phase-11-foundation-plan-gate.md)
 - [Corrección CIDR E2E](docs/e2e-readiness/phase-12-network-cidr-correction.md)
 - [Procedimiento de apply E2E Foundation](docs/e2e-readiness/phase-13-foundation-apply.md)
+- [Verificación post-apply de Foundation](docs/e2e-readiness/phase-14-foundation-verification.md)
