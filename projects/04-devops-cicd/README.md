@@ -23,8 +23,9 @@ en este directorio.
 
 ## Estado
 
-**Fase 0 — blueprint local.** No se ha construido una imagen, creado un
-workflow de GitHub Actions, ni desplegado AWS para este proyecto.
+**Fase 1 — contenedor local validado.** La imagen se construyó y su endpoint
+de salud fue verificado en Docker Desktop. Aún no existe workflow de GitHub
+Actions ni infraestructura AWS para este proyecto.
 
 ## Principios
 
@@ -42,6 +43,8 @@ workflow de GitHub Actions, ni desplegado AWS para este proyecto.
 - [Blueprint de CI/CD](docs/architecture/project-04-cicd-blueprint.md)
 - [ADR-001: OIDC y entrega temporal](docs/decisions/ADR-001-oidc-and-temporary-delivery.md)
 - [Cost Check de bootstrap](docs/cost-checks/phase-00-bootstrap.md)
+- [Validación local del contenedor](docs/operations/local-container-validation.md)
+- [Resultado de validación del contenedor](docs/validation/container-build-validation.md)
 
 ## Próximo checkpoint
 
