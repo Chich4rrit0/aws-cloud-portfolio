@@ -4,8 +4,9 @@
 
 `.github/workflows/project-04-ci.yml` valida los cambios relevantes al
 Proyecto 4 y al backend de referencia de Proyecto 1. El workflow se ejecuta
-en pull requests y en `main`, con filtros de rutas para evitar ejecuciones
-innecesarias en documentación o proyectos no relacionados.
+en pull requests, en `main` y manualmente con `workflow_dispatch`, con filtros
+de rutas para evitar ejecuciones innecesarias en documentación o proyectos no
+relacionados.
 
 ## Controles
 
