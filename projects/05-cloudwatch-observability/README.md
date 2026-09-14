@@ -44,7 +44,8 @@ Proyecto 5 (recursos propios, pendientes de aprobación)
 - [Blueprint de observabilidad](docs/architecture/observability-blueprint.md)
 - [ADR-001: límites entre proyectos](docs/decisions/ADR-001-cross-project-observability-boundaries.md)
 - [Cost Check inicial](docs/cost-checks/phase-00-local-foundation.md)
+- [Inventario AWS de fuentes](docs/inventory/aws-source-inventory-2026-09-14.md)
 
 ## Próximo checkpoint
 
-Inventario AWS de solo lectura para confirmar fuentes reales de métricas y logs. No se crearán dashboards, alarmas, SNS, métricas personalizadas ni otros recursos hasta completar ese inventario y documentar su impacto de costo.
+Diseñar las señales, consultas y mínimo de alarmas a partir del inventario confirmado. No se crearán dashboards, alarmas, SNS, métricas personalizadas ni otros recursos hasta documentar su impacto de costo y obtener autorización.
