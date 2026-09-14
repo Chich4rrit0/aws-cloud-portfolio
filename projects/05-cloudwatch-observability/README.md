@@ -45,7 +45,10 @@ Proyecto 5 (recursos propios, pendientes de aprobación)
 - [ADR-001: límites entre proyectos](docs/decisions/ADR-001-cross-project-observability-boundaries.md)
 - [Cost Check inicial](docs/cost-checks/phase-00-local-foundation.md)
 - [Inventario AWS de fuentes](docs/inventory/aws-source-inventory-2026-09-14.md)
+- [Catálogo de señales](docs/architecture/observability-signal-catalog.md)
+- [ADR-002: baseline de alarmas](docs/decisions/ADR-002-minimal-alerting-and-safe-incident-test.md)
+- [Runbooks y Logs Insights](docs/operations/logs-insights-runbooks.md)
 
 ## Próximo checkpoint
 
-Diseñar las señales, consultas y mínimo de alarmas a partir del inventario confirmado. No se crearán dashboards, alarmas, SNS, métricas personalizadas ni otros recursos hasta documentar su impacto de costo y obtener autorización.
+El baseline está diseñado localmente. El próximo checkpoint requiere aprobar el mínimo de recursos CloudWatch propios y su Cost Check antes de crear dashboard, alarmas o consultas guardadas.
