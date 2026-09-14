@@ -23,10 +23,11 @@ en este directorio.
 
 ## Estado
 
-**Fase 3 — imagen publicada y validada en ECR.** La imagen se validó localmente,
-el workflow de GitHub Actions completó pruebas y Docker build, y una ejecución
-manual OIDC publicó una única imagen privada con tag inmutable derivado del
-commit. No existe infraestructura ECS/Fargate, ALB o red para este proyecto.
+**CERRADO.** Se validaron Docker local, CI, publicación ECR mediante OIDC y
+una ejecución temporal CloudFormation → ECS/Fargate → ALB → CloudWatch Logs.
+El runtime temporal fue eliminado y verificado. Se conserva una imagen ECR
+inmutable y la identidad OIDC de publicación; no existe infraestructura ECS,
+ALB o red activa del Proyecto 4.
 
 ## Principios
 
@@ -59,9 +60,13 @@ commit. No existe infraestructura ECS/Fargate, ALB o red para este proyecto.
 - [Cost Check predespliegue ECS](docs/cost-checks/phase-01-ecs-lab-plan.md)
 - [Runbook del laboratorio ECS](docs/operations/ecs-lab-runbook.md)
 - [Validación de preflight ECS](docs/validation/ecs-lab-preflight-validation.md)
+- [Validación end-to-end ECS/Fargate](docs/validation/ecs-fargate-runtime-e2e-validation.md)
+- [Cost Check de teardown y cierre](docs/cost-checks/phase-02-teardown-and-closure.md)
+- [Validación de teardown](docs/validation/ecs-lab-teardown-validation.md)
+- [Cierre profesional](docs/operations/project-04-closeout.md)
 
 ## Próximo checkpoint
 
-Diseñar la demostración temporal ECS/Fargate y ALB con presupuesto, controles
-de seguridad y teardown explícito. No se creará infraestructura de cómputo o
-red sin una aprobación independiente.
+Proyecto cerrado. La observabilidad avanzada se reserva para el Proyecto 5;
+un despliegue automático de GitHub hacia ECS queda como extensión futura y no
+forma parte del resultado declarado de este proyecto.
