@@ -54,6 +54,7 @@ commit. No existe infraestructura ECS/Fargate, ALB o red para este proyecto.
 - [Diseño de publicador OIDC](docs/operations/github-oidc-ecr-publisher.md)
 - [Validación IAM OIDC](docs/validation/github-oidc-iam-validation.md)
 - [Validación de publicación ECR](docs/validation/ecr-publication-validation.md)
+- [Validación del template ECS](docs/validation/cloudformation-ecs-lab-template.md)
 - [ADR-002: laboratorio ECS/Fargate](docs/decisions/ADR-002-temporary-ecs-fargate-lab.md)
 - [Cost Check predespliegue ECS](docs/cost-checks/phase-01-ecs-lab-plan.md)
 

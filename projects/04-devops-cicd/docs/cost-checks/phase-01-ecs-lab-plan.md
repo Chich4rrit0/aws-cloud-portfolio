@@ -15,6 +15,7 @@ creado todavía.
 | IPv4 pública | Cargo por dirección en uso | Solo mientras exista la tarea; evitar Elastic IP. |
 | CloudWatch Logs | Ingestión y almacenamiento | Logs mínimos, retención siete días, eliminar log group en teardown. |
 | ECR | Una imagen ya almacenada | Lifecycle vigente; decidir retención/eliminación después de la evidencia. |
+| Roles IAM ECS | Sin cargo directo previsto | Execution role explícito; revisar service-linked role antes de creación. |
 
 ## Referencias de precios vigentes consultadas
 

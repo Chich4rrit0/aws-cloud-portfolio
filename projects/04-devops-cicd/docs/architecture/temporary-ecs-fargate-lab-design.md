@@ -38,12 +38,16 @@ tarea es el puerto 3000 desde el security group del ALB.
 
 | Elemento | Regla o permiso mínimo |
 |---|---|
-| Security group ALB | Entrada TCP 80 desde Internet; salida TCP 3000 solo al security group de tarea. |
+| Security group ALB | Entrada TCP 80 desde Internet; salida TCP 3000 solo al CIDR de la VPC aislada. |
 | Security group de tarea | Entrada TCP 3000 solo desde el security group ALB; salida HTTPS para ECR y CloudWatch. |
 | Execution role ECS | Leer la imagen de este ECR y escribir en un único log group. |
 | Task role | Se omite inicialmente: la API no necesita permisos AWS de negocio. |
 | GitHub deploy role | Pendiente; solo podrá registrar la task definition aprobada, actualizar el servicio objetivo y pasar los roles ECS concretos. |
 | GitHub publisher role | Ya existe y sigue limitado a ECR; no recibirá permisos ECS. |
+
+Al crear por primera vez un servicio ECS, AWS puede crear su service-linked role
+administrado `AWSServiceRoleForECS` si no existe. No tiene cargo directo, pero
+se tratará como un cambio IAM explícito dentro de la aprobación de despliegue.
 
 ## Runtime y observabilidad
 

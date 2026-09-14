@@ -1,0 +1,362 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Temporary and isolated ECS/Fargate laboratory for AWS Cloud Portfolio Project 04.
+  This stack intentionally avoids NAT Gateway, databases, domains, and secrets.
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: portfolio-p04
+    AllowedPattern: '^[a-z0-9-]+$'
+    Description: Lowercase prefix used in resource names.
+  ImageUri:
+    Type: String
+    Description: Immutable ECR image URI including the sha- tag to deploy.
+
+Resources:
+  LabVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.40.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ecs-lab-vpc'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ecs-lab-igw'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref LabVpc
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVpc
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ecs-lab-public-rt'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  DefaultInternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LabVpc
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.40.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ecs-lab-public-a'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LabVpc
+      AvailabilityZone: us-east-1b
+      CidrBlock: 10.40.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ecs-lab-public-b'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetA
+
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetB
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Internet HTTP ingress for the Project 04 temporary ALB.
+      VpcId: !Ref LabVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 10.40.0.0/16
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ecs-lab-alb-sg'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  TaskSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow only ALB health checks and traffic to the Fargate task.
+      VpcId: !Ref LabVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: udp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 10.40.0.2/32
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ecs-lab-task-sg'
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  TaskLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${ProjectPrefix}-task-manager'
+      RetentionInDays: 7
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-ecs-task-execution'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: PullProject04ImageAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                Resource: !Sub 'arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/portfolio-p04-task-manager'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/${ProjectPrefix}-task-manager:*'
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${ProjectPrefix}-ecs-lab'
+      ClusterSettings:
+        - Name: containerInsights
+          Value: disabled
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${ProjectPrefix}-task-manager'
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: '256'
+      Memory: '512'
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: task-manager-api
+          Image: !Ref ImageUri
+          Essential: true
+          PortMappings:
+            - ContainerPort: 3000
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref TaskLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: task-manager
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub '${ProjectPrefix}-ecs-lab-tg'
+      VpcId: !Ref LabVpc
+      TargetType: ip
+      Protocol: HTTP
+      Port: 3000
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 15
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      Matcher:
+        HttpCode: '200'
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub '${ProjectPrefix}-ecs-lab-alb'
+      Scheme: internet-facing
+      Type: application
+      IpAddressType: ipv4
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  HttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: HttpListener
+    Properties:
+      ServiceName: !Sub '${ProjectPrefix}-task-manager'
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref TaskDefinition
+      LaunchType: FARGATE
+      PlatformVersion: LATEST
+      DesiredCount: 1
+      EnableExecuteCommand: false
+      DeploymentConfiguration:
+        MaximumPercent: 100
+        MinimumHealthyPercent: 0
+      HealthCheckGracePeriodSeconds: 30
+      LoadBalancers:
+        - ContainerName: task-manager-api
+          ContainerPort: 3000
+          TargetGroupArn: !Ref TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - !Ref TaskSecurityGroup
+          Subnets:
+            - !Ref PublicSubnetA
+            - !Ref PublicSubnetB
+      Tags:
+        - Key: Project
+          Value: aws-cloud-portfolio
+        - Key: ProjectNumber
+          Value: '04'
+        - Key: ManagedBy
+          Value: CloudFormation
+
+Outputs:
+  LoadBalancerDnsName:
+    Description: Temporary HTTP endpoint for the validated lab. Delete the stack after use.
+    Value: !GetAtt LoadBalancer.DNSName
+  ClusterName:
+    Value: !Ref Cluster
+  ServiceName:
+    Value: !GetAtt Service.Name
+  LogGroupName:
+    Value: !Ref TaskLogGroup
