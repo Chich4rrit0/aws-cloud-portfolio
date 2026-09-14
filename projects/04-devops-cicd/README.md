@@ -23,10 +23,10 @@ en este directorio.
 
 ## Estado
 
-**EXTENSIÓN TEMPORAL ACTIVA.** El cierre original fue reabierto de forma
-deliberada para validar CD GitHub → ECS y observabilidad avanzada sobre el
-mismo laboratorio aislado. El runtime CloudFormation → ECS/Fargate → ALB está
-activo únicamente durante esta ventana. Se debe ejecutar el teardown al
+**EXTENSIÓN TEMPORAL VALIDADA Y ACTIVA.** El cierre original fue reabierto de
+forma deliberada para validar CD GitHub → ECS y observabilidad avanzada sobre
+el mismo laboratorio aislado. El runtime CloudFormation → ECS/Fargate → ALB
+está activo únicamente durante esta ventana. Se debe ejecutar el teardown al
 terminar la validación.
 
 ## Principios
@@ -72,9 +72,11 @@ terminar la validación.
 - [Operación CD GitHub → ECS](docs/operations/github-to-ecs-cd.md)
 - [Observabilidad avanzada temporal](docs/operations/advanced-observability.md)
 - [Cost Check de reactivación](docs/cost-checks/phase-03-cd-observability-reactivation.md)
+- [Validación CD GitHub → ECS](docs/validation/github-ecs-cd-validation.md)
+- [Validación de observabilidad avanzada](docs/validation/advanced-observability-validation.md)
 
 ## Próximo checkpoint
 
-Validar el workflow manual controlado GitHub → ECS con una imagen inmutable,
-comprobar el dashboard y las alarmas, registrar el resultado y ejecutar el
-teardown explícito del laboratorio.
+La validación CD y observabilidad está completada. El siguiente paso de costo
+responsable es ejecutar el teardown explícito del laboratorio cuando el usuario
+lo autorice; no se destruye automáticamente.
