@@ -17,6 +17,11 @@ definitions de la familia del laboratorio, actualizar el único servicio ECS y
 pasar el único execution role a ECS Tasks. No puede crear ni eliminar
 infraestructura, publicar imágenes, modificar IAM ni operar otros proyectos.
 
+`ecs:DescribeTaskDefinition` es la excepción técnica: AWS no permite limitar
+esa acción a un ARN concreto, por lo que se concede con `Resource: "*"` solo
+para lectura. Las acciones que cambian estado siguen restringidas a la familia,
+servicio y execution role del laboratorio.
+
 El stack CloudFormation incorpora un dashboard CloudWatch y dos alarmas sin
 acciones automáticas: target no saludable del ALB y CPU alta del servicio ECS.
 

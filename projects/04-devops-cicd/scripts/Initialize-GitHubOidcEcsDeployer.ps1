@@ -6,7 +6,8 @@ param(
     [string]$GitHubOwnerId = '66883602',
     [string]$GitHubRepository = 'aws-cloud-portfolio',
     [string]$GitHubRepositoryId = '1360395604',
-    [string]$Branch = 'main'
+    [string]$Branch = 'main',
+    [switch]$UpdateExisting
 )
 
 $ErrorActionPreference = 'Stop'
@@ -52,8 +53,12 @@ try {
     }
 
     $existingRoleOutput = & aws iam get-role --role-name $roleName --profile $ProfileName --no-cli-pager --output json 2>&1
-    if ($LASTEXITCODE -eq 0) {
-        throw "IAM role '$roleName' already exists. Stopping without changing its trust or permissions."
+    $roleExists = $LASTEXITCODE -eq 0
+    if ($roleExists -and -not $UpdateExisting) {
+        throw "IAM role '$roleName' already exists. Re-run with -UpdateExisting only to replace its documented inline policy."
+    }
+    if (-not $roleExists -and ($existingRoleOutput -join "`n") -notmatch 'NoSuchEntity') {
+        throw "Could not determine whether IAM role '$roleName' exists. Stopping without changing IAM."
     }
 
     $trustPolicy = @{
@@ -86,10 +91,17 @@ try {
                 Resource = $repositoryArn
             },
             @{
-                Sid = 'DescribeOnlyTheTemporaryLab'
+                Sid = 'DescribeOnlyTheTemporaryService'
                 Effect = 'Allow'
-                Action = @('ecs:DescribeServices', 'ecs:DescribeTaskDefinition')
-                Resource = @($clusterArn, $serviceArn, $taskDefinitionArn)
+                Action = 'ecs:DescribeServices'
+                Resource = $serviceArn
+                Condition = @{ StringEquals = @{ 'ecs:cluster' = $clusterArn } }
+            },
+            @{
+                Sid = 'DescribeTaskDefinitionRequiredWildcard'
+                Effect = 'Allow'
+                Action = 'ecs:DescribeTaskDefinition'
+                Resource = '*'
             },
             @{
                 Sid = 'RegisterOnlyProject04TaskDefinitions'
@@ -119,12 +131,14 @@ try {
     [System.IO.File]::WriteAllText($trustPolicyPath, ($trustPolicy | ConvertTo-Json -Depth 10), $utf8NoBom)
     [System.IO.File]::WriteAllText($permissionsPolicyPath, ($permissionsPolicy | ConvertTo-Json -Depth 10), $utf8NoBom)
 
-    Invoke-AwsCli -CliArguments @(
-        'iam', 'create-role', '--role-name', $roleName,
-        '--assume-role-policy-document', "file://$trustPolicyPath",
-        '--tags', 'Key=Project,Value=aws-cloud-portfolio', 'Key=ProjectNumber,Value=04',
-        'Key=Environment,Value=devops-lab', 'Key=ManagedBy,Value=aws-cli'
-    ) | Out-Null
+    if (-not $roleExists) {
+        Invoke-AwsCli -CliArguments @(
+            'iam', 'create-role', '--role-name', $roleName,
+            '--assume-role-policy-document', "file://$trustPolicyPath",
+            '--tags', 'Key=Project,Value=aws-cloud-portfolio', 'Key=ProjectNumber,Value=04',
+            'Key=Environment,Value=devops-lab', 'Key=ManagedBy,Value=aws-cli'
+        ) | Out-Null
+    }
 
     Invoke-AwsCli -CliArguments @(
         'iam', 'put-role-policy', '--role-name', $roleName,
@@ -139,7 +153,7 @@ try {
     }
 
     Write-Host 'GitHub OIDC provider verified.'
-    Write-Host 'Project 4 ECS deployer role created and verified.'
+    Write-Host "Project 4 ECS deployer role $(if ($roleExists) { 'policy updated' } else { 'created' }) and verified."
     Write-Host 'This role can update only the temporary Project 4 ECS service; it cannot create infrastructure.'
 }
 finally {

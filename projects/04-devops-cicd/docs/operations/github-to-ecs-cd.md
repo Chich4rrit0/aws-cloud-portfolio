@@ -16,6 +16,10 @@ No usa Access Keys, secretos de AWS ni tags mutables. El ARN del rol se guarda
 como variable no secreta del repositorio privado:
 `AWS_P04_ECS_DEPLOY_ROLE_ARN`.
 
+La consulta `ecs:DescribeTaskDefinition` usa el único wildcard de la política
+porque AWS no permite restringir dicha acción a un ARN de task definition. Es
+lectura; las operaciones mutables permanecen limitadas al laboratorio.
+
 ## Límite operacional
 
 El workflow no crea infraestructura, no publica imágenes, no escala el
