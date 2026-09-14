@@ -4,7 +4,9 @@ Proyecto transversal de observabilidad del AWS Cloud Portfolio. Su objetivo es d
 
 ## Estado
 
-**DISEÑO LOCAL.** No se ha creado ningún recurso AWS para este proyecto.
+**BASELINE DESPLEGADO.** El Proyecto 5 administra un dashboard CloudWatch,
+tres alarmas sin acciones y dos consultas guardadas. Las fuentes P2/P4 se
+observan en modo de solo lectura y no han sido modificadas.
 
 Los Proyectos 1–4 permanecen sin cambios. El Proyecto 4 tiene un laboratorio temporal activo que puede servir como fuente de métricas y logs de solo lectura; este proyecto no lo modifica ni lo mantiene activo.
 
@@ -48,7 +50,11 @@ Proyecto 5 (recursos propios, pendientes de aprobación)
 - [Catálogo de señales](docs/architecture/observability-signal-catalog.md)
 - [ADR-002: baseline de alarmas](docs/decisions/ADR-002-minimal-alerting-and-safe-incident-test.md)
 - [Runbooks y Logs Insights](docs/operations/logs-insights-runbooks.md)
+- [Validación de despliegue baseline](docs/validation/baseline-deployment-validation.md)
+- [Registro del rollback corregido](docs/validation/baseline-deployment-rollback.md)
 
 ## Próximo checkpoint
 
-El baseline está diseñado localmente. El próximo checkpoint requiere aprobar el mínimo de recursos CloudWatch propios y su Cost Check antes de crear dashboard, alarmas o consultas guardadas.
+Validar el comportamiento de las alarmas y un incidente controlado propio de
+P5, sin generar tráfico ni modificar P2/P4. Esa operación requerirá un plan y
+autorización separados.

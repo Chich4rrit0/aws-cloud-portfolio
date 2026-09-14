@@ -22,3 +22,15 @@ crear recursos. El presupuesto alerta con retraso y no bloquea automáticamente.
 
 Al cierre se eliminarán dashboard, alarmas y consultas guardadas que pertenezcan
 a P5. Las fuentes P2/P4 no se eliminan ni modifican desde este proyecto.
+
+## Resultado aplicado
+
+El baseline se creó el 2026-09-14 mediante el stack
+`portfolio-p05-observability`: un dashboard, tres recursos de alarma que
+evalúan cuatro métricas estándar y dos queries guardadas. Antes del despliegue
+había un dashboard y cuatro alarm metrics estándar; el baseline deja dos
+dashboards y ocho alarm metrics estándar, dentro de los límites Free Tier
+verificados para esta cuenta en ese momento.
+
+El budget reportó USD 0.00 al validar. Es una lectura de Billing con posible
+retraso, no una garantía de costo final cero.
