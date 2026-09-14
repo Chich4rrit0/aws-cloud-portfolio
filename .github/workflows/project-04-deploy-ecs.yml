@@ -62,7 +62,29 @@ jobs:
           --output text
 
       - name: Wait for service stabilization
-        run: >-
-          aws ecs wait services-stable
-          --cluster "$ECS_CLUSTER"
-          --services "$ECS_SERVICE"
+        run: |
+          for attempt in {1..45}; do
+            read -r ROLLOUT_STATE RUNNING_COUNT DESIRED_COUNT < <(
+              aws ecs describe-services \
+                --cluster "$ECS_CLUSTER" \
+                --services "$ECS_SERVICE" \
+                --query 'services[0].deployments[?status==`PRIMARY`]|[0].[rolloutState,runningCount,desiredCount]' \
+                --output text
+            )
+
+            if [[ "$ROLLOUT_STATE" == "COMPLETED" && "$RUNNING_COUNT" == "$DESIRED_COUNT" ]]; then
+              echo "ECS deployment is stable after attempt $attempt."
+              exit 0
+            fi
+
+            if [[ "$ROLLOUT_STATE" == "FAILED" ]]; then
+              echo "ECS deployment failed before becoming stable." >&2
+              exit 1
+            fi
+
+            echo "Attempt $attempt/45: rollout=$ROLLOUT_STATE running=$RUNNING_COUNT desired=$DESIRED_COUNT"
+            sleep 20
+          done
+
+          echo "ECS deployment did not stabilize within 15 minutes." >&2
+          exit 1

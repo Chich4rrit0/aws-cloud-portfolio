@@ -14,7 +14,7 @@ if (-not (Test-Path -LiteralPath $workflowPath)) {
 }
 
 $workflow = Get-Content -LiteralPath $workflowPath -Raw
-foreach ($requiredText in @('workflow_dispatch:', 'AWS_P04_ECS_DEPLOY_ROLE_ARN', 'register-task-definition', 'update-service', 'services-stable')) {
+foreach ($requiredText in @('workflow_dispatch:', 'AWS_P04_ECS_DEPLOY_ROLE_ARN', 'register-task-definition', 'update-service', 'rolloutState', '15 minutes')) {
     if ($workflow -notmatch [regex]::Escape($requiredText)) {
         throw "Workflow is missing required CD control: $requiredText"
     }

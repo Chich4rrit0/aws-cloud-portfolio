@@ -12,6 +12,11 @@
    `task-manager-api`.
 5. Actualiza el único servicio ECS y espera su estabilización.
 
+La espera inspecciona el rollout primario hasta 15 minutos. El waiter estándar
+de ECS expira aproximadamente a los diez minutos, un límite insuficiente para
+este laboratorio cuando la ventana de health checks del ALB es más lenta. El
+workflow falla antes solo si ECS declara el rollout `FAILED`.
+
 No usa Access Keys, secretos de AWS ni tags mutables. El ARN del rol se guarda
 como variable no secreta del repositorio privado:
 `AWS_P04_ECS_DEPLOY_ROLE_ARN`.
