@@ -57,6 +57,8 @@ commit. No existe infraestructura ECS/Fargate, ALB o red para este proyecto.
 - [Validación del template ECS](docs/validation/cloudformation-ecs-lab-template.md)
 - [ADR-002: laboratorio ECS/Fargate](docs/decisions/ADR-002-temporary-ecs-fargate-lab.md)
 - [Cost Check predespliegue ECS](docs/cost-checks/phase-01-ecs-lab-plan.md)
+- [Runbook del laboratorio ECS](docs/operations/ecs-lab-runbook.md)
+- [Validación de preflight ECS](docs/validation/ecs-lab-preflight-validation.md)
 
 ## Próximo checkpoint
 

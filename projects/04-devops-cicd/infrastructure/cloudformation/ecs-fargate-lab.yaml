@@ -360,3 +360,5 @@ Outputs:
     Value: !GetAtt Service.Name
   LogGroupName:
     Value: !Ref TaskLogGroup
+  TargetGroupArn:
+    Value: !Ref TargetGroup
