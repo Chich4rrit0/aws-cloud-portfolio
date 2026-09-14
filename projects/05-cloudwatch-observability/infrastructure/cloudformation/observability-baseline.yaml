@@ -1,0 +1,220 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Project 05 minimum CloudWatch baseline. It observes existing Project 2 and
+  Project 4 resources without changing either project.
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: portfolio-p05
+    AllowedPattern: '^[a-z0-9-]+$'
+  P2FunctionName:
+    Type: String
+  P2HttpApiId:
+    Type: String
+  P2HttpApiStage:
+    Type: String
+  P2TableName:
+    Type: String
+  P4ClusterName:
+    Type: String
+  P4ServiceName:
+    Type: String
+  P4LoadBalancerFullName:
+    Type: String
+  P4TargetGroupFullName:
+    Type: String
+  P4UnhealthyTargetAlarmName:
+    Type: String
+  P4CpuAlarmName:
+    Type: String
+
+Resources:
+  ObservabilityDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub '${ProjectPrefix}-observability'
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric", "width": 12, "height": 6,
+              "properties": {
+                "title": "P2 Lambda health", "view": "timeSeries", "region": "${AWS::Region}", "period": 300,
+                "metrics": [
+                  [ "AWS/Lambda", "Invocations", "FunctionName", "${P2FunctionName}", { "stat": "Sum" } ],
+                  [ ".", "Errors", ".", ".", { "stat": "Sum" } ],
+                  [ ".", "Throttles", ".", ".", { "stat": "Sum" } ],
+                  [ ".", "Duration", ".", ".", { "stat": "Average" } ]
+                ]
+              }
+            },
+            {
+              "type": "metric", "width": 12, "height": 6,
+              "properties": {
+                "title": "P2 HTTP API", "view": "timeSeries", "region": "${AWS::Region}", "period": 300,
+                "metrics": [
+                  [ "AWS/ApiGateway", "Count", "ApiId", "${P2HttpApiId}", "Stage", "${P2HttpApiStage}", { "stat": "Sum" } ],
+                  [ ".", "4xx", ".", ".", ".", ".", { "stat": "Sum" } ],
+                  [ ".", "5xx", ".", ".", ".", ".", { "stat": "Sum" } ],
+                  [ ".", "IntegrationLatency", ".", ".", ".", ".", { "stat": "Average" } ]
+                ]
+              }
+            },
+            {
+              "type": "metric", "width": 12, "height": 6,
+              "properties": {
+                "title": "P2 DynamoDB throttles and system errors", "view": "timeSeries", "region": "${AWS::Region}", "period": 300,
+                "metrics": [
+                  [ "AWS/DynamoDB", "ReadThrottleEvents", "TableName", "${P2TableName}", { "stat": "Sum" } ],
+                  [ ".", "WriteThrottleEvents", ".", ".", { "stat": "Sum" } ],
+                  [ ".", "SystemErrors", ".", ".", { "stat": "Sum" } ]
+                ]
+              }
+            },
+            {
+              "type": "metric", "width": 12, "height": 6,
+              "properties": {
+                "title": "P4 ECS capacity", "view": "timeSeries", "region": "${AWS::Region}", "period": 60,
+                "metrics": [
+                  [ "AWS/ECS", "CPUUtilization", "ServiceName", "${P4ServiceName}", "ClusterName", "${P4ClusterName}" ],
+                  [ ".", "MemoryUtilization", ".", ".", ".", "." ]
+                ]
+              }
+            },
+            {
+              "type": "metric", "width": 12, "height": 6,
+              "properties": {
+                "title": "P4 ALB availability", "view": "timeSeries", "region": "${AWS::Region}", "period": 60,
+                "metrics": [
+                  [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${P4LoadBalancerFullName}", { "stat": "Sum" } ],
+                  [ ".", "TargetResponseTime", ".", ".", { "stat": "Average" } ],
+                  [ ".", "HTTPCode_ELB_5XX_Count", ".", ".", { "stat": "Sum" } ],
+                  [ ".", "UnHealthyHostCount", ".", ".", "TargetGroup", "${P4TargetGroupFullName}", { "stat": "Maximum" } ]
+                ]
+              }
+            },
+            {
+              "type": "alarm", "width": 12, "height": 6,
+              "properties": {
+                "title": "P4 existing alarms and P5 baseline alarms",
+                "alarms": [
+                  "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${P4UnhealthyTargetAlarmName}",
+                  "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${P4CpuAlarmName}",
+                  "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${ProjectPrefix}-p02-lambda-errors",
+                  "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${ProjectPrefix}-p02-http-api-5xx",
+                  "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${ProjectPrefix}-p02-dynamodb-throttles"
+                ]
+              }
+            }
+          ]
+        }
+
+  P2LambdaErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectPrefix}-p02-lambda-errors'
+      AlarmDescription: P5 baseline signal. No automated action is configured.
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref P2FunctionName
+
+  P2HttpApi5xxAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectPrefix}-p02-http-api-5xx'
+      AlarmDescription: P5 baseline signal. No automated action is configured.
+      Namespace: AWS/ApiGateway
+      MetricName: 5xx
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: ApiId
+          Value: !Ref P2HttpApiId
+        - Name: Stage
+          Value: !Ref P2HttpApiStage
+
+  P2DynamoDbThrottlesAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectPrefix}-p02-dynamodb-throttles'
+      AlarmDescription: P5 baseline signal. No automated action is configured.
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Metrics:
+        - Id: readThrottles
+          MetricStat:
+            Metric:
+              Namespace: AWS/DynamoDB
+              MetricName: ReadThrottleEvents
+              Dimensions:
+                - Name: TableName
+                  Value: !Ref P2TableName
+            Period: 300
+            Stat: Sum
+          ReturnData: false
+        - Id: writeThrottles
+          MetricStat:
+            Metric:
+              Namespace: AWS/DynamoDB
+              MetricName: WriteThrottleEvents
+              Dimensions:
+                - Name: TableName
+                  Value: !Ref P2TableName
+            Period: 300
+            Stat: Sum
+          ReturnData: false
+        - Id: totalThrottles
+          Expression: readThrottles + writeThrottles
+          Label: Total throttles
+          ReturnData: true
+
+  P2LambdaErrorQuery:
+    Type: AWS::Logs::QueryDefinition
+    Properties:
+      Name: !Sub '${ProjectPrefix}-p02-lambda-errors'
+      LogGroupNames:
+        - !Sub '/aws/lambda/${P2FunctionName}'
+      QueryString: |
+        fields @timestamp, @message, @requestId
+        | filter @message like /ERROR|Error|error/
+        | sort @timestamp desc
+        | limit 50
+
+  P4EcsTaskQuery:
+    Type: AWS::Logs::QueryDefinition
+    Properties:
+      Name: !Sub '${ProjectPrefix}-p04-ecs-task-events'
+      LogGroupNames:
+        - /ecs/portfolio-p04-task-manager
+      QueryString: |
+        fields @timestamp, @message, @logStream
+        | sort @timestamp desc
+        | limit 50
+
+Outputs:
+  DashboardName:
+    Value: !Ref ObservabilityDashboard
+  LambdaErrorsAlarmName:
+    Value: !Ref P2LambdaErrorsAlarm
+  HttpApi5xxAlarmName:
+    Value: !Ref P2HttpApi5xxAlarm
+  DynamoDbThrottlesAlarmName:
+    Value: !Ref P2DynamoDbThrottlesAlarm
