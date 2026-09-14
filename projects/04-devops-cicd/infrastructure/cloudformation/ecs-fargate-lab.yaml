@@ -350,6 +350,96 @@ Resources:
         - Key: ManagedBy
           Value: CloudFormation
 
+  ObservabilityDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub '${ProjectPrefix}-ecs-lab'
+      DashboardBody: !Sub
+        - |
+          {
+            "widgets": [
+              {
+                "type": "metric",
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "title": "ECS service utilization",
+                  "view": "timeSeries",
+                  "region": "${AWS::Region}",
+                  "stat": "Average",
+                  "period": 60,
+                  "metrics": [
+                    [ "AWS/ECS", "CPUUtilization", "ServiceName", "${ServiceName}", "ClusterName", "${ClusterName}" ],
+                    [ ".", "MemoryUtilization", ".", ".", ".", "." ]
+                  ]
+                }
+              },
+              {
+                "type": "metric",
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "title": "ALB requests, latency, and unhealthy targets",
+                  "view": "timeSeries",
+                  "region": "${AWS::Region}",
+                  "period": 60,
+                  "metrics": [
+                    [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${LoadBalancerFullName}", { "stat": "Sum" } ],
+                    [ ".", "TargetResponseTime", ".", ".", { "stat": "Average" } ],
+                    [ ".", "UnHealthyHostCount", ".", ".", "TargetGroup", "${TargetGroupFullName}", { "stat": "Maximum" } ],
+                    [ ".", "HTTPCode_ELB_5XX_Count", ".", ".", { "stat": "Sum" } ]
+                  ]
+                }
+              }
+            ]
+          }
+        - {
+            ServiceName: !GetAtt Service.Name,
+            ClusterName: !Ref Cluster,
+            LoadBalancerFullName: !GetAtt LoadBalancer.LoadBalancerFullName,
+            TargetGroupFullName: !GetAtt TargetGroup.TargetGroupFullName
+          }
+
+  UnhealthyTargetAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectPrefix}-ecs-lab-unhealthy-target'
+      AlarmDescription: Temporary lab signal; no automated action is configured.
+      Namespace: AWS/ApplicationELB
+      MetricName: UnHealthyHostCount
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: LoadBalancer
+          Value: !GetAtt LoadBalancer.LoadBalancerFullName
+        - Name: TargetGroup
+          Value: !GetAtt TargetGroup.TargetGroupFullName
+
+  ServiceCpuAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectPrefix}-ecs-lab-high-cpu'
+      AlarmDescription: Temporary lab signal; no automated action is configured.
+      Namespace: AWS/ECS
+      MetricName: CPUUtilization
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 2
+      DatapointsToAlarm: 2
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref Cluster
+        - Name: ServiceName
+          Value: !GetAtt Service.Name
+
 Outputs:
   LoadBalancerDnsName:
     Description: Temporary HTTP endpoint for the validated lab. Delete the stack after use.
@@ -362,3 +452,9 @@ Outputs:
     Value: !Ref TaskLogGroup
   TargetGroupArn:
     Value: !Ref TargetGroup
+  TaskDefinitionArn:
+    Value: !Ref TaskDefinition
+  TaskExecutionRoleArn:
+    Value: !GetAtt TaskExecutionRole.Arn
+  ObservabilityDashboardName:
+    Value: !Ref ObservabilityDashboard

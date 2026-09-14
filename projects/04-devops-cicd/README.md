@@ -23,11 +23,11 @@ en este directorio.
 
 ## Estado
 
-**CERRADO.** Se validaron Docker local, CI, publicación ECR mediante OIDC y
-una ejecución temporal CloudFormation → ECS/Fargate → ALB → CloudWatch Logs.
-El runtime temporal fue eliminado y verificado. Se conserva una imagen ECR
-inmutable y la identidad OIDC de publicación; no existe infraestructura ECS,
-ALB o red activa del Proyecto 4.
+**EXTENSIÓN TEMPORAL ACTIVA.** El cierre original fue reabierto de forma
+deliberada para validar CD GitHub → ECS y observabilidad avanzada sobre el
+mismo laboratorio aislado. El runtime CloudFormation → ECS/Fargate → ALB está
+activo únicamente durante esta ventana. Se debe ejecutar el teardown al
+terminar la validación.
 
 ## Principios
 
@@ -37,6 +37,10 @@ ALB o red activa del Proyecto 4.
 - Imágenes privadas y con etiquetas inmutables ligadas al commit.
 - ECS/Fargate y ALB solo en una ventana de prueba aprobada; teardown el mismo
   día.
+- Un segundo rol OIDC separado y mínimo para desplegar solo hacia el servicio
+  temporal ECS; no se amplía el rol que publica en ECR.
+- Dashboard CloudWatch y alarmas sin acciones automáticas; sin Container
+  Insights, SNS ni métricas personalizadas.
 - Sin NAT Gateway, dominio, Route 53, datos de producción ni secretos en Git.
 - Los Proyectos 1, 2 y 3 no se modifican.
 
@@ -64,9 +68,13 @@ ALB o red activa del Proyecto 4.
 - [Cost Check de teardown y cierre](docs/cost-checks/phase-02-teardown-and-closure.md)
 - [Validación de teardown](docs/validation/ecs-lab-teardown-validation.md)
 - [Cierre profesional](docs/operations/project-04-closeout.md)
+- [ADR-004: CD GitHub → ECS y observabilidad temporal](docs/decisions/ADR-004-github-ecs-cd-and-observability.md)
+- [Operación CD GitHub → ECS](docs/operations/github-to-ecs-cd.md)
+- [Observabilidad avanzada temporal](docs/operations/advanced-observability.md)
+- [Cost Check de reactivación](docs/cost-checks/phase-03-cd-observability-reactivation.md)
 
 ## Próximo checkpoint
 
-Proyecto cerrado. La observabilidad avanzada se reserva para el Proyecto 5;
-un despliegue automático de GitHub hacia ECS queda como extensión futura y no
-forma parte del resultado declarado de este proyecto.
+Validar el workflow manual controlado GitHub → ECS con una imagen inmutable,
+comprobar el dashboard y las alarmas, registrar el resultado y ejecutar el
+teardown explícito del laboratorio.
