@@ -34,3 +34,11 @@ verificados para esta cuenta en ese momento.
 
 El budget reportó USD 0.00 al validar. Es una lectura de Billing con posible
 retraso, no una garantía de costo final cero.
+
+## Validación de incidente controlado
+
+El 2026-09-14 se ejecutó una consulta guardada de Logs Insights para validar el
+runbook. La consulta terminó correctamente con dos filas sobre un grupo de logs
+existente y pequeño. Logs Insights se cobra por datos escaneados y el consumo
+real debe confirmarse posteriormente en Billing; no se infiere costo cero por
+esta lectura. La prueba no creó recursos adicionales ni generó tráfico.

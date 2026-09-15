@@ -40,5 +40,8 @@ fields @timestamp, @message, @requestId
 
 ## Prueba de incidente P5
 
-La prueba aprobada deberá dejar evidencia de: alarma en `ALARM`, ejecución del
-runbook, estado devuelto a `OK`, y ausencia de cambios en P2/P4.
+Validada el 2026-09-14. La alarma propia P5 de errores Lambda se forzó a
+`ALARM` mediante CloudWatch, sin acciones automáticas configuradas. Se ejecutó
+la consulta guardada de Logs Insights sobre el grupo de logs existente de P2;
+completó con dos filas. Finalmente, la alarma se devolvió a `OK` y el baseline
+volvió a validarse. No se generó tráfico ni se modificaron P2/P4.
