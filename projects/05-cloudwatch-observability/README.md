@@ -4,10 +4,10 @@ Proyecto transversal de observabilidad del AWS Cloud Portfolio. Su objetivo es d
 
 ## Estado
 
-**BASELINE DESPLEGADO Y VALIDADO.** El Proyecto 5 administra un dashboard
-CloudWatch, tres alarmas sin acciones y dos consultas guardadas. Una prueba de
-incidente controlada verificó la respuesta operacional sin generar tráfico ni
-modificar las fuentes P2/P4.
+**PROYECTO CERRADO — baseline desplegado y validado.** El Proyecto 5 administra
+un dashboard CloudWatch, tres alarmas sin acciones y dos consultas guardadas.
+Una prueba de incidente controlada verificó la respuesta operacional sin
+generar tráfico ni modificar las fuentes P2/P4.
 
 Los Proyectos 1–4 permanecen sin cambios. El Proyecto 4 tiene un laboratorio temporal activo que puede servir como fuente de métricas y logs de solo lectura; este proyecto no lo modifica ni lo mantiene activo.
 
@@ -56,9 +56,10 @@ Proyecto 5 (recursos propios desplegados)
 - [Validación de incidente controlado](docs/validation/controlled-incident-validation.md)
 - [Cost Check final](docs/cost-checks/final-cost-check.md)
 - [Guía de limpieza](docs/operations/teardown-guide.md)
+- [Revisión final del proyecto](docs/validation/final-project-review.md)
 
 ## Próximo checkpoint
 
-Completar el Cost Check final, documentar la limpieza segura de los recursos
-propios de P5 y decidir el momento de cierre. No se hará teardown sin una
-aprobación explícita.
+No quedan tareas de implementación pendientes. El stack P5 se conserva como
+demostración; un teardown futuro exige una aprobación explícita y se limita a
+los recursos propios de P5.
