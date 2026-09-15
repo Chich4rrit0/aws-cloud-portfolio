@@ -1,6 +1,7 @@
 # Validación — incidente controlado P5
 
-**Fecha:** 2026-09-14  
+**Fecha:** 2026-09-14
+
 **Resultado:** aprobado
 
 ## Objetivo

@@ -54,6 +54,8 @@ Proyecto 5 (recursos propios desplegados)
 - [Validación de despliegue baseline](docs/validation/baseline-deployment-validation.md)
 - [Registro del rollback corregido](docs/validation/baseline-deployment-rollback.md)
 - [Validación de incidente controlado](docs/validation/controlled-incident-validation.md)
+- [Cost Check final](docs/cost-checks/final-cost-check.md)
+- [Guía de limpieza](docs/operations/teardown-guide.md)
 
 ## Próximo checkpoint
 
