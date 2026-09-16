@@ -7,8 +7,8 @@ mejoras priorizado.
 
 ## Estado
 
-**FASE 0 — fundamento documental.** No se han creado ni modificado recursos
-AWS para este proyecto. P6 es una revisión basada en evidencia, no un
+**FASE 1 — assessment estático completado.** No se han creado ni modificado
+recursos AWS para este proyecto. P6 es una revisión basada en evidencia, no un
 redeploy de P1 ni un cambio a los proyectos cerrados.
 
 ## Alcance
@@ -54,6 +54,10 @@ una revisión formal de producción ni inventar evidencia ausente.
 - [ADR-001: revisión basada en evidencia](docs/decisions/ADR-001-evidence-based-case-study.md)
 - [Registro de evidencia](docs/evidence/evidence-register.md)
 - [Cost Check de fundamento](docs/cost-checks/phase-00-case-study-foundation.md)
+- [Assessment de los seis pilares](docs/assessment/pillar-assessment.md)
+- [Arquitectura objetivo no desplegada](docs/architecture/target-architecture.md)
+- [Backlog de mejoras](docs/recommendations/improvement-backlog.md)
+- [ADR-002: priorización](docs/decisions/ADR-002-improvement-prioritization.md)
 
 ## Fuentes principales
 
@@ -65,5 +69,6 @@ una revisión formal de producción ni inventar evidencia ausente.
 
 ## Próximo checkpoint
 
-Construir el assessment estático de los seis pilares usando el registro de
-evidencia. No requiere crear recursos ni ejecutar cambios sobre AWS.
+Hacer una verificación AWS de solo lectura para separar estado histórico de
+estado actual y, con ese resultado, consolidar el informe y cierre de P6. No
+requiere crear, actualizar ni eliminar recursos.
