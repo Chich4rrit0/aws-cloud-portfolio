@@ -58,6 +58,7 @@ una revisión formal de producción ni inventar evidencia ausente.
 - [Arquitectura objetivo no desplegada](docs/architecture/target-architecture.md)
 - [Backlog de mejoras](docs/recommendations/improvement-backlog.md)
 - [ADR-002: priorización](docs/decisions/ADR-002-improvement-prioritization.md)
+- [Auditoría actual de solo lectura](docs/operations/current-state-audit.md)
 
 ## Fuentes principales
 
