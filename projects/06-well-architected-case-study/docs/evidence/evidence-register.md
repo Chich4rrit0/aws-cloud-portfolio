@@ -9,6 +9,7 @@
 | E-03 | Revisión histórica Well-Architected P1 | Riesgos y recomendaciones iniciales | Insumo, no conclusión final automática. |
 | E-04 | Runbook de limpieza P1 | Límites de costo y dependencias de teardown | Documentada; no prueba estado actual. |
 | E-05 | ADRs P1 | Razonamiento de seguridad, secretos, edge y RDS | Decisiones históricas aceptadas. |
+| E-10 | Auditoría P6 de 2026-09-16 | Estado puntual y seguro de recursos P1 | Lectura AWS sin cambios; no valida carga ni costos históricos. |
 
 ## Evidencia de madurez posterior, fuera de alcance
 
@@ -21,8 +22,6 @@
 
 ## Evidencia pendiente
 
-- Estado actual de los recursos P1: **PENDIENTE DE VERIFICAR** mediante una
-  consulta AWS de solo lectura si se necesita para el informe final.
 - Resultado de restore de RDS: **PENDIENTE DE VERIFICAR**; no existe evidencia
   de una práctica de recuperación.
 - Métricas de latencia y carga sostenida P1: **PENDIENTE DE VERIFICAR**.

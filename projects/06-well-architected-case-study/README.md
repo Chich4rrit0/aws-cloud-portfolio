@@ -7,7 +7,7 @@ mejoras priorizado.
 
 ## Estado
 
-**FASE 1 — assessment estático completado.** No se han creado ni modificado
+**PROYECTO CERRADO — case study validado.** No se han creado ni modificado
 recursos AWS para este proyecto. P6 es una revisión basada en evidencia, no un
 redeploy de P1 ni un cambio a los proyectos cerrados.
 
@@ -59,6 +59,10 @@ una revisión formal de producción ni inventar evidencia ausente.
 - [Backlog de mejoras](docs/recommendations/improvement-backlog.md)
 - [ADR-002: priorización](docs/decisions/ADR-002-improvement-prioritization.md)
 - [Auditoría actual de solo lectura](docs/operations/current-state-audit.md)
+- [Resultado de auditoría actual](docs/evidence/current-state-audit-2026-09-16.md)
+- [Cost Check de auditoría](docs/cost-checks/phase-01-current-state-audit.md)
+- [Informe final del case study](docs/assessment/final-case-study.md)
+- [Revisión final de P6](docs/validation/final-project-review.md)
 
 ## Fuentes principales
 
@@ -70,6 +74,6 @@ una revisión formal de producción ni inventar evidencia ausente.
 
 ## Próximo checkpoint
 
-Hacer una verificación AWS de solo lectura para separar estado histórico de
-estado actual y, con ese resultado, consolidar el informe y cierre de P6. No
-requiere crear, actualizar ni eliminar recursos.
+No quedan tareas de implementación pendientes. P1 sigue activo como workload
+de demostración; su teardown permanece fuera de P6 y exige una aprobación
+explícita con el runbook correspondiente.

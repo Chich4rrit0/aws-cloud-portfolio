@@ -9,10 +9,9 @@ base de datos, cifrado hacia el origen y automatización. Las capacidades de
 P2–P5 muestran cómo podría evolucionar el portafolio, pero no cambian el estado
 actual de P1.
 
-Este assessment usa evidencia histórica E-01 a E-05. No afirma el estado AWS
-del 2026-09-16; esa confirmación permanece pendiente de una consulta de solo
-lectura. No se asigna un puntaje numérico: los gaps sin evidencia no deben
-convertirse en una métrica artificial de madurez.
+Este assessment combina evidencia histórica E-01 a E-05 con la auditoría
+puntual E-10 del 2026-09-16. No se asigna un puntaje numérico: los gaps sin
+evidencia no deben convertirse en una métrica artificial de madurez.
 
 | Pilar | Evaluación | Conclusión |
 | --- | --- | --- |
@@ -134,8 +133,8 @@ base.
 
 ### Gaps y trade-offs
 
-- ALB, RDS, EC2/EBS, S3, CloudFront y CloudWatch pueden generar cargos mientras
-  existan; P6 no confirma si siguen activos hoy.
+- La auditoría E-10 confirma que ASG/EC2, RDS, ALB, CloudFront y el log group
+  siguen presentes; pueden generar cargos mientras continúe el despliegue.
 - El budget alerta con retraso y no detiene el gasto automáticamente.
 - T3 Unlimited puede implicar cargos de CPU credits en carga sostenida.
 
